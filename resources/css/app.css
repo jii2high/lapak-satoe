@@ -1,0 +1,259 @@
+@import 'tailwindcss';
+
+@import 'tw-animate-css';
+@import '@fontsource-variable/bricolage-grotesque';
+@import '@fontsource-variable/plus-jakarta-sans';
+
+@source '../views';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+    --font-sans:
+        'Plus Jakarta Sans Variable', system-ui, -apple-system, 'Segoe UI',
+        sans-serif;
+    --font-display:
+        'Bricolage Grotesque Variable', 'Plus Jakarta Sans Variable', system-ui,
+        sans-serif;
+
+    --text-xs: 0.75rem;
+    --text-xs--line-height: 1rem;
+    --text-sm: 0.875rem;
+    --text-sm--line-height: 1.25rem;
+    --text-base: 0.9375rem;
+    --text-base--line-height: 1.5rem;
+    --text-lg: 1.125rem;
+    --text-lg--line-height: 1.625rem;
+    --text-xl: 1.375rem;
+    --text-xl--line-height: 1.875rem;
+    --text-2xl: 1.75rem;
+    --text-2xl--line-height: 2.125rem;
+    --text-4xl: 2.75rem;
+    --text-4xl--line-height: 3rem;
+
+    --radius-sm: 0px;
+    --radius-md: 2px;
+    --radius-lg: 2px;
+    --radius-xl: 4px;
+
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+
+    --color-highlight: var(--highlight);
+    --color-highlight-foreground: var(--highlight-foreground);
+    --color-highlight-soft: var(--highlight-soft);
+    --color-price: var(--price);
+
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+    --background: #f8f9f5;
+    --foreground: #1b2620;
+    --card: #ffffff;
+    --card-foreground: #1b2620;
+    --popover: #ffffff;
+    --popover-foreground: #1b2620;
+
+    --primary: #2f6b4f;
+    --primary-foreground: #ffffff;
+    --secondary: #e8f0ea;
+    --secondary-foreground: #17382a;
+    --muted: #eef2ec;
+    --muted-foreground: #5a675f;
+    --accent: #e8f0ea;
+    --accent-foreground: #17382a;
+
+    --highlight: #f97316;
+    --highlight-foreground: #1b2620;
+    --highlight-soft: #ffebdb;
+    --price: #a84305;
+
+    --destructive: #b3261e;
+    --destructive-foreground: #ffffff;
+
+    --border: #d9ded6;
+    --input: #84948a;
+    --ring: #2f6b4f;
+
+    --sidebar: #24543d;
+    --sidebar-foreground: #f8f9f5;
+    --sidebar-primary: #f97316;
+    --sidebar-primary-foreground: #1b2620;
+    --sidebar-accent: #2f6b4f;
+    --sidebar-accent-foreground: #ffffff;
+    --sidebar-border: #3a6a52;
+    --sidebar-ring: #f8f9f5;
+
+    --awning-a: #2f6b4f;
+    --awning-b: #cfe0d4;
+
+    --chart-1: #2f6b4f;
+    --chart-2: #7fa88b;
+    --chart-3: #cfe0d4;
+    --chart-4: #f97316;
+    --chart-5: #5a675f;
+}
+
+.dark {
+    --background: #101812;
+    --foreground: #e9f0ea;
+    --card: #18231c;
+    --card-foreground: #e9f0ea;
+    --popover: #18231c;
+    --popover-foreground: #e9f0ea;
+
+    --primary: #6fbf8e;
+    --primary-foreground: #0f1a13;
+    --secondary: #223029;
+    --secondary-foreground: #e9f0ea;
+    --muted: #1d2a22;
+    --muted-foreground: #9db0a3;
+    --accent: #223029;
+    --accent-foreground: #e9f0ea;
+
+    --highlight: #f97316;
+    --highlight-foreground: #0f1a13;
+    --highlight-soft: #3a2412;
+    --price: #fb923c;
+
+    --destructive: #f2877f;
+    --destructive-foreground: #0f1a13;
+
+    --border: #2c3a31;
+    --input: #5e7266;
+    --ring: #6fbf8e;
+
+    --sidebar: #14201a;
+    --sidebar-foreground: #e9f0ea;
+    --sidebar-primary: #f97316;
+    --sidebar-primary-foreground: #0f1a13;
+    --sidebar-accent: #223029;
+    --sidebar-accent-foreground: #e9f0ea;
+    --sidebar-border: #2c3a31;
+    --sidebar-ring: #6fbf8e;
+
+    --awning-a: #2f6b4f;
+    --awning-b: #1e3a2b;
+
+    --chart-1: #6fbf8e;
+    --chart-2: #3f8a62;
+    --chart-3: #2c3a31;
+    --chart-4: #fb923c;
+    --chart-5: #9db0a3;
+}
+
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+        font-variant-numeric: tabular-nums;
+    }
+
+    button:not(:disabled),
+    [role='button']:not([aria-disabled='true']),
+    summary,
+    label[for],
+    select {
+        cursor: pointer;
+    }
+
+    button:disabled,
+    [aria-disabled='true'] {
+        cursor: not-allowed;
+    }
+
+    h1,
+    h2,
+    h3 {
+        @apply font-display tracking-[-0.01em];
+    }
+}
+
+@layer components {
+    .awning {
+        height: 10px;
+        background: repeating-linear-gradient(
+            90deg,
+            var(--awning-a) 0 20px,
+            var(--awning-b) 20px 40px
+        );
+    }
+
+    .awning-sm {
+        height: 6px;
+    }
+
+    .awning-lg {
+        height: 14px;
+    }
+
+    .awning-intro {
+        transform-origin: top;
+        animation: awning-unroll 400ms ease-out both;
+    }
+}
+
+@keyframes awning-unroll {
+    from {
+        transform: scaleY(0);
+    }
+    to {
+        transform: scaleY(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .awning-intro {
+        animation: none;
+    }
+
+    *,
+    *::before,
+    *::after {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+    }
+}
