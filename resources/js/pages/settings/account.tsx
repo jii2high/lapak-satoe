@@ -1,6 +1,7 @@
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { LogOut, Pencil } from 'lucide-react';
 import { useState } from 'react';
+import { EmailVerificationDialog } from '@/components/account/email-verification-dialog';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
 import { Badge } from '@/components/ui/badge';
@@ -18,11 +19,12 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { clearSessionCache } from '@/lib/session-cache';
 import { logout } from '@/routes';
-import { preference, switchRole } from '@/routes/account';
+import { edit as account, switchRole } from '@/routes/account';
 import { update as updateDisplayName } from '@/routes/account/display-name';
 import { update as updateEmail } from '@/routes/account/email';
 import { update as updatePassword } from '@/routes/account/password';
 import { update as updateUsername } from '@/routes/account/username';
+import { create as sellerApplication } from '@/routes/seller-application';
 import type { Role } from '@/types';
 
 type AccountRole = {
@@ -64,10 +66,13 @@ const dialogCopy: Record<
     },
 };
 
-export default function AccountIndex({ roles }: Props) {
+export default function Account({ roles }: Props) {
     const { auth } = usePage().props;
     const user = auth.user;
     const [editing, setEditing] = useState<EditMode>(null);
+    const [otpOpen, setOtpOpen] = useState(false);
+
+    const isSeller = roles.some((role) => role.value === 'seller');
 
     const displayNameForm = useForm({ display_name: user.display_name });
     const usernameForm = useForm({ username: user.username });
@@ -106,9 +111,6 @@ export default function AccountIndex({ roles }: Props) {
                     </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                    <Button asChild variant="outline">
-                        <Link href={preference()}>Preferensi tampilan</Link>
-                    </Button>
                     <Button asChild variant="outline">
                         <Link
                             href={logout()}
@@ -194,15 +196,39 @@ export default function AccountIndex({ roles }: Props) {
                                     </Badge>
                                 </div>
                             </div>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => open('email')}
-                            >
-                                <Pencil aria-hidden />
-                                <span className="sr-only">Ubah email</span>
-                            </Button>
+                            <div className="flex shrink-0 items-center gap-1">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => open('email')}
+                                >
+                                    <Pencil aria-hidden />
+                                    <span className="sr-only">Ubah email</span>
+                                </Button>
+                            </div>
                         </div>
+
+                        {!user.email_verified && (
+                            <div className="flex flex-col gap-3 border-t border-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+                                <div>
+                                    <p className="font-medium">
+                                        Emailmu belum terverifikasi
+                                    </p>
+                                    <p className="text-sm text-muted-foreground">
+                                        Verifikasi email untuk bisa mendaftar
+                                        jadi penjual.
+                                    </p>
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="shrink-0 self-start sm:self-auto"
+                                    onClick={() => setOtpOpen(true)}
+                                >
+                                    Verifikasi email
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 </section>
 
@@ -274,8 +300,29 @@ export default function AccountIndex({ roles }: Props) {
                     <p className="mt-2 text-xs text-muted-foreground">
                         Mode menentukan halaman yang kamu buka setelah masuk.
                     </p>
+
+                    {!isSeller && (
+                        <div className="mt-4 flex flex-col gap-3 border border-border bg-card px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <p className="font-medium">
+                                    Belum punya lapak?
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                    Daftar jadi penjual supaya produkmu bisa
+                                    tampil di katalog.
+                                </p>
+                            </div>
+                            <Button asChild className="shrink-0">
+                                <Link href={sellerApplication()}>
+                                    Jadi penjual
+                                </Link>
+                            </Button>
+                        </div>
+                    )}
                 </section>
             </div>
+
+            <EmailVerificationDialog open={otpOpen} onOpenChange={setOtpOpen} />
 
             <Dialog
                 open={editing !== null}
@@ -579,3 +626,12 @@ export default function AccountIndex({ roles }: Props) {
         </>
     );
 }
+
+Account.layout = {
+    breadcrumbs: [
+        {
+            title: 'Pengaturan',
+            href: account(),
+        },
+    ],
+};

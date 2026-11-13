@@ -3,7 +3,6 @@ import type { PropsWithChildren } from 'react';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn, toUrl } from '@/lib/utils';
 import { edit as account, preference } from '@/routes/account';
-import { edit as security } from '@/routes/security';
 import type { NavItem } from '@/types';
 
 const sidebarNavItems: NavItem[] = [
@@ -15,20 +14,19 @@ const sidebarNavItems: NavItem[] = [
         title: 'Preferensi',
         href: preference(),
     },
-    {
-        title: 'Keamanan',
-        href: security(),
-    },
 ];
 
-export default function SettingsLayout({ children }: PropsWithChildren) {
+export default function SettingsLayout({
+    children,
+    padded = true,
+}: PropsWithChildren<{ padded?: boolean }>) {
     const { isCurrentOrParentUrl } = useCurrentUrl();
 
     return (
-        <div className="px-4 py-6 md:px-6">
+        <div className={cn(padded && 'px-4 py-6 md:px-6')}>
             <h1 className="font-display text-2xl font-bold">Pengaturan</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-                Kelola akun, tampilan, dan keamananmu.
+                Kelola akun dan tampilanmu.
             </p>
 
             <div className="mt-6 flex flex-col gap-6 lg:flex-row lg:gap-12">

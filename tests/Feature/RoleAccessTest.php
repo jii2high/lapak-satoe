@@ -52,4 +52,33 @@ class RoleAccessTest extends TestCase
 
         $this->actingAs($user)->get(route('seller.dashboard'))->assertRedirect(route('home'));
     }
+
+    public function test_sellers_are_redirected_from_home_to_the_seller_dashboard()
+    {
+        $user = User::factory()->withRole(Role::Seller, active: true)->create();
+
+        $this->actingAs($user)
+            ->get(route('home'))
+            ->assertRedirect(route('seller.dashboard'));
+    }
+
+    public function test_admins_are_redirected_from_home_to_the_admin_dashboard()
+    {
+        $user = User::factory()->withRole(Role::Admin, active: true)->create();
+
+        $this->actingAs($user)
+            ->get(route('home'))
+            ->assertRedirect(route('admin.dashboard'));
+    }
+
+    public function test_role_prefixes_redirect_to_their_dashboards()
+    {
+        $seller = User::factory()->withRole(Role::Seller, active: true)->create();
+        $admin = User::factory()->withRole(Role::Admin, active: true)->create();
+
+        $this->actingAs($seller)
+            ->get('/seller')
+            ->assertRedirect('/seller/dashboard');
+        $this->actingAs($admin)->get('/admin')->assertRedirect('/admin/dashboard');
+    }
 }

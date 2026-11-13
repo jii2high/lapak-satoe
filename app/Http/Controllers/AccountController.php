@@ -28,7 +28,7 @@ class AccountController extends Controller
             ->values()
             ->all();
 
-        return Inertia::render('account/index', [
+        return Inertia::render('settings/account', [
             'roles' => $roles,
         ]);
     }

@@ -1,12 +1,10 @@
 import { Link, router, usePage } from '@inertiajs/react';
 import {
     ArrowLeftRight,
+    ClipboardList,
     Home,
     LayoutGrid,
-    LockKeyhole,
-    Palette,
     Tags,
-    UserRound,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
@@ -22,9 +20,9 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { home } from '@/routes';
-import { edit as account, preference, switchRole } from '@/routes/account';
-import { edit as security } from '@/routes/security';
+import { switchRole } from '@/routes/account';
 import { dashboard as adminDashboard } from '@/routes/admin';
+import { index as adminApplications } from '@/routes/admin/applications';
 import { index as adminCategories } from '@/routes/admin/categories';
 import { dashboard as sellerDashboard } from '@/routes/seller';
 import type { NavItem } from '@/types';
@@ -47,15 +45,17 @@ export function AppSidebar() {
         ...(role === 'admin'
             ? [
                   {
+                      title: 'Antrean pendaftaran',
+                      href: adminApplications(),
+                      icon: ClipboardList,
+                  },
+                  {
                       title: 'Kategori',
                       href: adminCategories(),
                       icon: Tags,
                   },
               ]
             : []),
-        { title: 'Akun', href: account(), icon: UserRound },
-        { title: 'Preferensi', href: preference(), icon: Palette },
-        { title: 'Keamanan', href: security(), icon: LockKeyhole },
     ];
 
     return (

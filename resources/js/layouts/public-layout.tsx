@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/sheet';
 import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn } from '@/lib/utils';
-import { explore, home, login, register } from '@/routes';
+import { explore, home, login, register, terms } from '@/routes';
 import { edit as account } from '@/routes/account';
 import { index as wishlist } from '@/routes/wishlist';
 
@@ -203,6 +203,12 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                         Katalog lapak siswa SMKN 1 Kota Bekasi. Transaksi
                         selesai lewat WhatsApp.
                     </p>
+                    <Link
+                        href={terms()}
+                        className="mt-1 flex min-h-11 items-center self-start underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+                    >
+                        Syarat dan ketentuan
+                    </Link>
                 </div>
             </footer>
 

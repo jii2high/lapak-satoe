@@ -234,6 +234,55 @@
         transform-origin: top;
         animation: awning-unroll 400ms ease-out both;
     }
+
+    .prose-lapak {
+        @apply text-base text-foreground;
+    }
+
+    .prose-lapak > :first-child {
+        margin-top: 0;
+    }
+
+    .prose-lapak h1 {
+        @apply mb-4 font-display text-2xl font-bold;
+    }
+
+    .prose-lapak h2 {
+        @apply mt-8 mb-3 font-display text-xl font-semibold;
+    }
+
+    .prose-lapak h3 {
+        @apply mt-6 mb-2 font-display text-lg font-semibold;
+    }
+
+    .prose-lapak p {
+        @apply my-3 leading-relaxed;
+    }
+
+    .prose-lapak ol,
+    .prose-lapak ul {
+        @apply my-3 grid gap-2 pl-5;
+    }
+
+    .prose-lapak ol {
+        @apply list-decimal;
+    }
+
+    .prose-lapak ul {
+        @apply list-disc;
+    }
+
+    .prose-lapak a {
+        @apply text-primary underline underline-offset-4;
+    }
+
+    .prose-lapak strong {
+        @apply font-semibold;
+    }
+
+    .prose-lapak hr {
+        @apply my-8 border-border;
+    }
 }
 
 @keyframes awning-unroll {

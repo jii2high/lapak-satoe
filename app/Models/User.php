@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
-use Laravel\Fortify\TwoFactorAuthenticatable;
 
 /**
  * @property int $id
@@ -24,20 +23,17 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property string $password
  * @property Role $active_role
  * @property bool $is_active
- * @property string|null $two_factor_secret
- * @property string|null $two_factor_recovery_codes
- * @property Carbon|null $two_factor_confirmed_at
  * @property string|null $remember_token
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
  */
 #[Fillable(['display_name', 'username', 'email', 'password', 'active_role', 'is_active'])]
-#[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
+#[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, SoftDeletes, TwoFactorAuthenticatable;
+    use HasFactory, Notifiable, SoftDeletes;
 
     /**
      * Get the attributes that should be cast.
@@ -51,7 +47,6 @@ class User extends Authenticatable
             'password' => 'hashed',
             'active_role' => Role::class,
             'is_active' => 'boolean',
-            'two_factor_confirmed_at' => 'datetime',
         ];
     }
 
@@ -69,11 +64,31 @@ class User extends Authenticatable
     }
 
     /**
+     * Every application the user ever sent, newest last.
+     *
+     * @return HasMany<SellerApplication, $this>
+     */
+    public function applications(): HasMany
+    {
+        return $this->hasMany(SellerApplication::class);
+    }
+
+    /**
+     * The application the user is currently waiting on or last heard about.
+     *
      * @return HasOne<SellerApplication, $this>
      */
     public function sellerApplication(): HasOne
     {
-        return $this->hasOne(SellerApplication::class);
+        return $this->hasOne(SellerApplication::class)->latestOfMany();
+    }
+
+    /**
+     * @return HasMany<EmailOtp, $this>
+     */
+    public function emailOtps(): HasMany
+    {
+        return $this->hasMany(EmailOtp::class);
     }
 
     /**

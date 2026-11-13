@@ -25,7 +25,7 @@ class AccountTest extends TestCase
             ->get(route('account.edit'))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('account/index')
+                ->component('settings/account')
                 ->where('auth.user.display_name', 'Budi Santoso')
                 ->where('auth.user.username', 'budi')
                 ->where('auth.user.email_masked', 'b***@example.com')
@@ -154,6 +154,25 @@ class AccountTest extends TestCase
         $this->actingAs($user)
             ->get(route('account.preference'))
             ->assertOk()
-            ->assertInertia(fn (Assert $page) => $page->component('account/preference'));
+            ->assertInertia(fn (Assert $page) => $page->component('settings/preference'));
+    }
+
+    public function test_settings_prefix_redirects_to_the_account_page()
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get('/settings')
+            ->assertRedirect('/settings/account');
+    }
+
+    public function test_legacy_account_urls_redirect_to_settings()
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->get('/akun')->assertRedirect('/settings/account');
+        $this->actingAs($user)
+            ->get('/akun/preferensi')
+            ->assertRedirect('/settings/preference');
     }
 }

@@ -18,7 +18,7 @@ class LoginResponse implements LoginResponseContract
     public function toResponse($request)
     {
         return $request->wantsJson()
-            ? response()->json(['two_factor' => false])
+            ? response()->json()
             : redirect()->intended(HomePath::for($request->user()));
     }
 }

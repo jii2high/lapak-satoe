@@ -1,5 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft } from 'lucide-react';
+import { Head } from '@inertiajs/react';
 import AppearanceToggleTab from '@/components/appearance-tabs';
 import { edit as account } from '@/routes/account';
 
@@ -7,14 +6,6 @@ export default function Preference() {
     return (
         <>
             <Head title="Preferensi tampilan" />
-
-            <Link
-                href={account()}
-                className="mb-6 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-            >
-                <ArrowLeft className="size-4" aria-hidden />
-                Kembali ke akun
-            </Link>
 
             <h1 className="font-display text-2xl font-bold">
                 Preferensi tampilan
@@ -34,3 +25,12 @@ export default function Preference() {
         </>
     );
 }
+
+Preference.layout = {
+    breadcrumbs: [
+        {
+            title: 'Pengaturan',
+            href: account(),
+        },
+    ],
+};
