@@ -37,6 +37,12 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { useDebounce } from '@/hooks/use-debounce';
+import {
+    useCacheInvalidator,
+    useSessionCache,
+    useSessionKey,
+} from '@/hooks/use-session-cache';
+import { fetchJson } from '@/lib/http';
 import { formatRupiah } from '@/lib/format';
 import {
     bulk as bulkProducts,
@@ -45,6 +51,7 @@ import {
     edit as editProduct,
     index as productsIndex,
 } from '@/routes/seller/products';
+import { products as productsData } from '@/routes/seller/data';
 import type { Paginator } from '@/types';
 
 type ProductRow = {
@@ -136,7 +143,32 @@ function ProductThumb({
     );
 }
 
-export default function SellerProducts({ products, filters }: Props) {
+export default function SellerProducts(props: Props) {
+    const key = useSessionKey(
+        `seller:products:${props.products.current_page}:${props.filters.q}:${props.filters.status}`,
+    );
+
+    const { data } = useSessionCache<Props>(
+        key,
+        () =>
+            fetchJson<Props>(
+                productsData.url({
+                    query: {
+                        ...(props.filters.q === ''
+                            ? {}
+                            : { q: props.filters.q }),
+                        ...(props.filters.status === 'all'
+                            ? {}
+                            : { status: props.filters.status }),
+                        page: props.products.current_page,
+                    },
+                }),
+            ),
+        props,
+    );
+
+    const invalidate = useCacheInvalidator();
+    const { products, filters } = data ?? props;
     const [search, setSearch] = useState(filters.q);
     const debounced = useDebounce(search);
     const [selected, setSelected] = useState<number[]>([]);
@@ -208,6 +240,7 @@ export default function SellerProducts({ products, filters }: Props) {
                 onSuccess: () => {
                     setSelected([]);
                     setBulkDeleteOpen(false);
+                    invalidate('seller:products');
                 },
                 onFinish: () => setBusy(false),
             },
@@ -226,6 +259,7 @@ export default function SellerProducts({ products, filters }: Props) {
                 setSelected((current) =>
                     current.filter((id) => id !== deleting.id),
                 );
+                invalidate('seller:products');
             },
         });
     };

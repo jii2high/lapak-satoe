@@ -34,12 +34,19 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { useDebounce } from '@/hooks/use-debounce';
 import {
+    useCacheInvalidator,
+    useSessionCache,
+    useSessionKey,
+} from '@/hooks/use-session-cache';
+import { fetchJson } from '@/lib/http';
+import {
     index as reports,
     pdf as reportPdf,
     process as processReport,
     reject as rejectReport,
     restore as restoreReport,
 } from '@/routes/admin/reports';
+import { reports as reportsData } from '@/routes/admin/data';
 import type { Paginator } from '@/types';
 
 type Report = {
@@ -129,7 +136,32 @@ function formatDate(value: string | null): string {
     });
 }
 
-export default function AdminReports({ reports: rows, filters }: Props) {
+export default function AdminReports(props: Props) {
+    const key = useSessionKey(
+        `admin:reports:${props.reports.current_page}:${props.filters.q}:${props.filters.status}`,
+    );
+
+    const { data } = useSessionCache<Props>(
+        key,
+        () =>
+            fetchJson<Props>(
+                reportsData.url({
+                    query: {
+                        ...(props.filters.q === ''
+                            ? {}
+                            : { q: props.filters.q }),
+                        ...(props.filters.status === 'all'
+                            ? {}
+                            : { status: props.filters.status }),
+                        page: props.reports.current_page,
+                    },
+                }),
+            ),
+        props,
+    );
+
+    const invalidate = useCacheInvalidator();
+    const { reports: rows, filters } = data ?? props;
     const [detail, setDetail] = useState<Report | null>(null);
     const [processing, setProcessing] = useState<Report | null>(null);
     const [rejecting, setRejecting] = useState<Report | null>(null);
@@ -198,7 +230,10 @@ export default function AdminReports({ reports: rows, filters }: Props) {
 
         processForm.post(processReport.url(processing.id), {
             preserveScroll: true,
-            onSuccess: () => setProcessing(null),
+            onSuccess: () => {
+                setProcessing(null);
+                invalidate('admin:reports');
+            },
         });
     };
 
@@ -209,7 +244,10 @@ export default function AdminReports({ reports: rows, filters }: Props) {
 
         rejectForm.post(rejectReport.url(rejecting.id), {
             preserveScroll: true,
-            onSuccess: () => setRejecting(null),
+            onSuccess: () => {
+                setRejecting(null);
+                invalidate('admin:reports');
+            },
         });
     };
 
@@ -224,7 +262,10 @@ export default function AdminReports({ reports: rows, filters }: Props) {
             {},
             {
                 preserveScroll: true,
-                onSuccess: () => setRestoring(null),
+                onSuccess: () => {
+                    setRestoring(null);
+                    invalidate('admin:reports');
+                },
                 onFinish: () => setBusy(false),
             },
         );

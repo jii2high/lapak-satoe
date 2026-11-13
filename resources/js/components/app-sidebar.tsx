@@ -14,6 +14,7 @@ import {
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
+import { clearSessionCache } from '@/lib/session-cache';
 import {
     Sidebar,
     SidebarContent,
@@ -121,11 +122,12 @@ export function AppSidebar() {
                         <SidebarMenu>
                             <SidebarMenuItem>
                                 <SidebarMenuButton
-                                    onClick={() =>
+                                    onClick={() => {
+                                        clearSessionCache(auth.user.id);
                                         router.post(switchRole.url(), {
                                             role: 'buyer',
-                                        })
-                                    }
+                                        });
+                                    }}
                                     tooltip={{ children: 'Ganti ke Buyer' }}
                                 >
                                     <ArrowLeftRight />

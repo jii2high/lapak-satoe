@@ -295,11 +295,12 @@ export default function Account({ roles, seller_application }: Props) {
                                         variant="secondary"
                                         size="sm"
                                         disabled={active}
-                                        onClick={() =>
+                                        onClick={() => {
+                                            clearSessionCache(user.id);
                                             router.post(switchRole(), {
                                                 role: role.value,
-                                            })
-                                        }
+                                            });
+                                        }}
                                     >
                                         {active
                                             ? 'Mode aktif'

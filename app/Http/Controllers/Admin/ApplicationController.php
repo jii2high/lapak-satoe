@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\RejectApplicationRequest;
 use App\Models\SellerApplication;
 use App\Services\ApplicationService;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -20,6 +21,19 @@ class ApplicationController extends Controller
     public function __construct(private readonly ApplicationService $applications) {}
 
     public function index(Request $request): Response
+    {
+        return Inertia::render('admin/applications', $this->payload($request));
+    }
+
+    public function data(Request $request): JsonResponse
+    {
+        return response()->json($this->payload($request));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function payload(Request $request): array
     {
         $query = trim((string) $request->query('q', ''));
         $status = $request->query('status');
@@ -64,13 +78,13 @@ class ApplicationController extends Controller
                 'student_card_url' => route('admin.applications.card', $application),
             ]);
 
-        return Inertia::render('admin/applications', [
+        return [
             'applications' => $applications,
             'filters' => [
                 'q' => $query,
                 'status' => $status,
             ],
-        ]);
+        ];
     }
 
     public function approve(Request $request, SellerApplication $application): RedirectResponse

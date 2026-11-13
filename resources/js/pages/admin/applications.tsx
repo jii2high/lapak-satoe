@@ -34,10 +34,17 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { useDebounce } from '@/hooks/use-debounce';
 import {
+    useCacheInvalidator,
+    useSessionCache,
+    useSessionKey,
+} from '@/hooks/use-session-cache';
+import { fetchJson } from '@/lib/http';
+import {
     approve as approveApplication,
     index as applicationsIndex,
     reject as rejectApplication,
 } from '@/routes/admin/applications';
+import { applications as applicationsData } from '@/routes/admin/data';
 import type { Paginator } from '@/types';
 
 type Application = {
@@ -124,7 +131,32 @@ function formatDate(value: string | null): string {
     });
 }
 
-export default function AdminApplications({ applications, filters }: Props) {
+export default function AdminApplications(props: Props) {
+    const key = useSessionKey(
+        `admin:applications:${props.applications.current_page}:${props.filters.q}:${props.filters.status}`,
+    );
+
+    const { data } = useSessionCache<Props>(
+        key,
+        () =>
+            fetchJson<Props>(
+                applicationsData.url({
+                    query: {
+                        ...(props.filters.q === ''
+                            ? {}
+                            : { q: props.filters.q }),
+                        ...(props.filters.status === 'all'
+                            ? {}
+                            : { status: props.filters.status }),
+                        page: props.applications.current_page,
+                    },
+                }),
+            ),
+        props,
+    );
+
+    const invalidate = useCacheInvalidator();
+    const { applications, filters } = data ?? props;
     const [detail, setDetail] = useState<Application | null>(null);
     const [approving, setApproving] = useState<Application | null>(null);
     const [approveError, setApproveError] = useState<string | null>(null);
@@ -196,6 +228,7 @@ export default function AdminApplications({ applications, filters }: Props) {
                 onSuccess: () => {
                     setApproving(null);
                     setDetail(null);
+                    invalidate('admin:applications');
                 },
                 onError: () =>
                     setApproveError(
@@ -213,7 +246,10 @@ export default function AdminApplications({ applications, filters }: Props) {
 
         rejectForm.post(rejectApplication.url(rejecting.id), {
             preserveScroll: true,
-            onSuccess: () => setRejecting(null),
+            onSuccess: () => {
+                setRejecting(null);
+                invalidate('admin:applications');
+            },
         });
     };
 

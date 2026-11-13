@@ -10,6 +10,7 @@ use App\Models\Order;
 use App\Services\OrderService;
 use App\Support\OrderPresenter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -41,6 +42,19 @@ class OrderController extends Controller
 
     public function index(Request $request): Response
     {
+        return Inertia::render('seller/orders', $this->payload($request));
+    }
+
+    public function data(Request $request): JsonResponse
+    {
+        return response()->json($this->payload($request));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function payload(Request $request): array
+    {
         $tab = $request->query('tab') === 'riwayat' ? 'riwayat' : 'aktif';
         $statuses = $tab === 'riwayat' ? self::HISTORY : self::ACTIVE;
         $submitted = $request->query('status');
@@ -65,14 +79,14 @@ class OrderController extends Controller
             ->withQueryString()
             ->through(fn (Order $order) => OrderPresenter::row($order));
 
-        return Inertia::render('seller/orders', [
+        return [
             'orders' => $orders,
             'tab' => $tab,
             'filters' => [
                 'q' => $query,
                 'status' => $status,
             ],
-        ]);
+        ];
     }
 
     public function accept(Request $request, Order $order, OrderService $orders): RedirectResponse

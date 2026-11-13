@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { useCacheInvalidator } from '@/hooks/use-session-cache';
 import { formatRupiah } from '@/lib/format';
 import { cancel, confirm } from '@/routes/orders';
 import {
@@ -84,11 +85,21 @@ export function OrderCard({
     const [note, setNote] = useState('');
     const [noteError, setNoteError] = useState<string>();
     const [busy, setBusy] = useState(false);
+    const invalidate = useCacheInvalidator();
 
     const close = () => {
         setDialog(null);
         setNote('');
         setNoteError(undefined);
+    };
+
+    // Seller actions change the cached order list, so drop it after a success.
+    const closeAndInvalidate = () => {
+        close();
+
+        if (viewer === 'seller') {
+            invalidate('seller:orders');
+        }
     };
 
     const run = (url: string, data: Record<string, string> = {}) => {
@@ -100,7 +111,7 @@ export function OrderCard({
                     setNoteError(errors.note);
                 }
             },
-            onSuccess: close,
+            onSuccess: closeAndInvalidate,
             onFinish: () => setBusy(false),
         });
     };
@@ -115,7 +126,7 @@ export function OrderCard({
             {
                 preserveScroll: true,
                 onError: (errors) => setNoteError(errors.note),
-                onSuccess: close,
+                onSuccess: closeAndInvalidate,
                 onFinish: () => setBusy(false),
             },
         );

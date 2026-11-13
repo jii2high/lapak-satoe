@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -15,6 +16,19 @@ use Inertia\Response;
 class CategoryController extends Controller
 {
     public function index(): Response
+    {
+        return Inertia::render('admin/categories', $this->payload());
+    }
+
+    public function data(): JsonResponse
+    {
+        return response()->json($this->payload());
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function payload(): array
     {
         $categories = Category::query()
             ->withCount(['products' => fn ($query) => $query->withTrashed()])
@@ -27,9 +41,7 @@ class CategoryController extends Controller
                 'product_count' => $category->products_count,
             ]);
 
-        return Inertia::render('admin/categories', [
-            'categories' => $categories,
-        ]);
+        return ['categories' => $categories];
     }
 
     public function store(Request $request): RedirectResponse

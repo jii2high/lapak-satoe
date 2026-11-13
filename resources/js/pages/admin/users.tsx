@@ -31,11 +31,18 @@ import {
 } from '@/components/ui/table';
 import { useDebounce } from '@/hooks/use-debounce';
 import {
+    useCacheInvalidator,
+    useSessionCache,
+    useSessionKey,
+} from '@/hooks/use-session-cache';
+import { fetchJson } from '@/lib/http';
+import {
     index as users,
     destroy as destroyUser,
     reset as resetUserPassword,
     toggle as toggleUser,
 } from '@/routes/admin/users';
+import { users as usersData } from '@/routes/admin/data';
 import { update as updateUserEmail } from '@/routes/admin/users/email';
 import type { Paginator } from '@/types';
 
@@ -72,7 +79,29 @@ function StatusBadge({ active }: { active: boolean }) {
     );
 }
 
-export default function AdminUsers({ users: rows, filters }: Props) {
+export default function AdminUsers(props: Props) {
+    const key = useSessionKey(
+        `admin:users:${props.users.current_page}:${props.filters.q}`,
+    );
+
+    const { data } = useSessionCache<Props>(
+        key,
+        () =>
+            fetchJson<Props>(
+                usersData.url({
+                    query: {
+                        ...(props.filters.q === ''
+                            ? {}
+                            : { q: props.filters.q }),
+                        page: props.users.current_page,
+                    },
+                }),
+            ),
+        props,
+    );
+
+    const invalidate = useCacheInvalidator();
+    const { users: rows, filters } = data ?? props;
     const [search, setSearch] = useState(filters.q);
     const [editing, setEditing] = useState<UserRow | null>(null);
     const [resetting, setResetting] = useState<UserRow | null>(null);
@@ -108,7 +137,10 @@ export default function AdminUsers({ users: rows, filters }: Props) {
 
         emailForm.patch(updateUserEmail.url(editing.id), {
             preserveScroll: true,
-            onSuccess: () => setEditing(null),
+            onSuccess: () => {
+                setEditing(null);
+                invalidate('admin:users');
+            },
         });
     };
 
@@ -123,7 +155,10 @@ export default function AdminUsers({ users: rows, filters }: Props) {
             {},
             {
                 preserveScroll: true,
-                onSuccess: () => setResetting(null),
+                onSuccess: () => {
+                    setResetting(null);
+                    invalidate('admin:users');
+                },
                 onFinish: () => setBusy(false),
             },
         );
@@ -140,7 +175,10 @@ export default function AdminUsers({ users: rows, filters }: Props) {
             {},
             {
                 preserveScroll: true,
-                onSuccess: () => setToggling(null),
+                onSuccess: () => {
+                    setToggling(null);
+                    invalidate('admin:users');
+                },
                 onFinish: () => setBusy(false),
             },
         );
@@ -154,7 +192,10 @@ export default function AdminUsers({ users: rows, filters }: Props) {
         setBusy(true);
         router.delete(destroyUser.url(deleting.id), {
             preserveScroll: true,
-            onSuccess: () => setDeleting(null),
+            onSuccess: () => {
+                setDeleting(null);
+                invalidate('admin:users');
+            },
             onFinish: () => setBusy(false),
         });
     };

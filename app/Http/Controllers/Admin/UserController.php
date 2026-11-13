@@ -10,6 +10,7 @@ use App\Models\UserRole;
 use App\Services\UserService;
 use App\Support\EmailMask;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
@@ -22,6 +23,19 @@ class UserController extends Controller
     public function __construct(private readonly UserService $users) {}
 
     public function index(Request $request): Response
+    {
+        return Inertia::render('admin/users', $this->payload($request));
+    }
+
+    public function data(Request $request): JsonResponse
+    {
+        return response()->json($this->payload($request));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function payload(Request $request): array
     {
         $query = trim((string) $request->query('q', ''));
         $pattern = '%'.addcslashes($query, '%_\\').'%';
@@ -52,12 +66,12 @@ class UserController extends Controller
                 'created_at' => $user->created_at?->toIso8601String(),
             ]);
 
-        return Inertia::render('admin/users', [
+        return [
             'users' => $users,
             'filters' => [
                 'q' => $query,
             ],
-        ]);
+        ];
     }
 
     public function updateEmail(UpdateUserEmailRequest $request, User $user): RedirectResponse

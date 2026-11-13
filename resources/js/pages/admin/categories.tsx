@@ -28,6 +28,13 @@ import {
     store as storeCategory,
     update as updateCategory,
 } from '@/routes/admin/categories';
+import { categories as categoriesData } from '@/routes/admin/data';
+import {
+    useCacheInvalidator,
+    useSessionCache,
+    useSessionKey,
+} from '@/hooks/use-session-cache';
+import { fetchJson } from '@/lib/http';
 
 type CategoryRow = {
     id: number;
@@ -40,7 +47,16 @@ type Props = {
     categories: CategoryRow[];
 };
 
-export default function AdminCategories({ categories }: Props) {
+export default function AdminCategories(props: Props) {
+    const key = useSessionKey('admin:categories');
+    const { data } = useSessionCache<Props>(
+        key,
+        () => fetchJson<Props>(categoriesData.url()),
+        props,
+    );
+
+    const invalidate = useCacheInvalidator();
+    const { categories } = data ?? props;
     const [editing, setEditing] = useState<CategoryRow | null>(null);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [deleting, setDeleting] = useState<CategoryRow | null>(null);
@@ -69,7 +85,10 @@ export default function AdminCategories({ categories }: Props) {
     const submit = () => {
         const options = {
             preserveScroll: true,
-            onSuccess: closeDialog,
+            onSuccess: () => {
+                closeDialog();
+                invalidate('admin:categories');
+            },
         };
 
         if (editing === null) {
@@ -86,7 +105,10 @@ export default function AdminCategories({ categories }: Props) {
 
         router.delete(destroyCategory.url(deleting.id), {
             preserveScroll: true,
-            onSuccess: () => setDeleting(null),
+            onSuccess: () => {
+                setDeleting(null);
+                invalidate('admin:categories');
+            },
         });
     };
 

@@ -65,6 +65,8 @@ Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->g
     Route::redirect('/', '/seller/dashboard')->name('root');
     Route::get('dashboard', [SellerDashboardController::class, 'index'])->name('dashboard');
     Route::get('data/dashboard', [SellerDashboardController::class, 'data'])->name('data.dashboard');
+    Route::get('data/orders', [SellerOrderController::class, 'data'])->name('data.orders');
+    Route::get('data/products', [SellerProductController::class, 'data'])->name('data.products');
 
     Route::get('products', [SellerProductController::class, 'index'])->name('products.index');
     Route::get('products/create', [SellerProductController::class, 'create'])->name('products.create');
@@ -89,6 +91,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::redirect('/', '/admin/dashboard')->name('root');
     Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::get('data/dashboard', [AdminDashboardController::class, 'data'])->name('data.dashboard');
+    Route::get('data/users', [UserController::class, 'data'])->name('data.users');
+    Route::get('data/categories', [CategoryController::class, 'data'])->name('data.categories');
+    Route::get('data/applications', [ApplicationController::class, 'data'])->name('data.applications');
+    Route::get('data/reports', [AdminReportController::class, 'data'])->name('data.reports');
 
     Route::get('users', [UserController::class, 'index'])->name('users.index');
     Route::patch('users/{user}/email', [UserController::class, 'updateEmail'])->name('users.email.update');

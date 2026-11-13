@@ -12,6 +12,7 @@ use App\Models\Report;
 use App\Models\Store;
 use App\Support\ImageStorage;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -26,6 +27,19 @@ use Throwable;
 class ProductController extends Controller
 {
     public function index(Request $request): Response
+    {
+        return Inertia::render('seller/products/index', $this->payload($request));
+    }
+
+    public function data(Request $request): JsonResponse
+    {
+        return response()->json($this->payload($request));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function payload(Request $request): array
     {
         $store = $this->currentStore($request);
         $query = trim((string) $request->query('q', ''));
@@ -48,13 +62,13 @@ class ProductController extends Controller
             ->withQueryString()
             ->through(fn (Product $product) => $this->presentRow($product));
 
-        return Inertia::render('seller/products/index', [
+        return [
             'products' => $products,
             'filters' => [
                 'q' => $query,
                 'status' => $status,
             ],
-        ]);
+        ];
     }
 
     public function create(Request $request): Response

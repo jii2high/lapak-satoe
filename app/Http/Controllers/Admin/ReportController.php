@@ -10,6 +10,7 @@ use App\Models\Report;
 use App\Services\ReportService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -22,6 +23,19 @@ class ReportController extends Controller
     public function __construct(private readonly ReportService $reports) {}
 
     public function index(Request $request): Response
+    {
+        return Inertia::render('admin/reports', $this->payload($request));
+    }
+
+    public function data(Request $request): JsonResponse
+    {
+        return response()->json($this->payload($request));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function payload(Request $request): array
     {
         $violations = config('lapak.violation_types');
         $query = trim((string) $request->query('q', ''));
@@ -68,13 +82,13 @@ class ReportController extends Controller
                 'created_at' => $report->created_at?->toIso8601String(),
             ]);
 
-        return Inertia::render('admin/reports', [
+        return [
             'reports' => $reports,
             'filters' => [
                 'q' => $query,
                 'status' => $status,
             ],
-        ]);
+        ];
     }
 
     public function process(ProcessReportRequest $request, Report $report): RedirectResponse
