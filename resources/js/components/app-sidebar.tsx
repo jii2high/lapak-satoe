@@ -4,6 +4,7 @@ import {
     ClipboardList,
     Home,
     LayoutGrid,
+    Store,
     Tags,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
@@ -25,6 +26,7 @@ import { dashboard as adminDashboard } from '@/routes/admin';
 import { index as adminApplications } from '@/routes/admin/applications';
 import { index as adminCategories } from '@/routes/admin/categories';
 import { dashboard as sellerDashboard } from '@/routes/seller';
+import { edit as sellerStore } from '@/routes/seller/store';
 import type { NavItem } from '@/types';
 
 export function AppSidebar() {
@@ -42,6 +44,15 @@ export function AppSidebar() {
         ...(role === 'buyer'
             ? [{ title: 'Beranda', href: home(), icon: Home }]
             : [{ title: 'Dashboard', href: dashboardHref, icon: LayoutGrid }]),
+        ...(role === 'seller'
+            ? [
+                  {
+                      title: 'Pengaturan lapak',
+                      href: sellerStore(),
+                      icon: Store,
+                  },
+              ]
+            : []),
         ...(role === 'admin'
             ? [
                   {

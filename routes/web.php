@@ -8,6 +8,7 @@ use App\Http\Controllers\Marketplace\ProductController;
 use App\Http\Controllers\Marketplace\SearchController;
 use App\Http\Controllers\Marketplace\StoreController;
 use App\Http\Controllers\Marketplace\WishlistController;
+use App\Http\Controllers\Seller\StoreController as SellerStoreController;
 use App\Http\Controllers\SellerApplicationController;
 use App\Http\Controllers\TermsController;
 use Illuminate\Support\Facades\Route;
@@ -33,6 +34,10 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {
     Route::redirect('/', '/seller/dashboard')->name('root');
     Route::inertia('dashboard', 'seller/dashboard')->name('dashboard');
+
+    Route::get('store', [SellerStoreController::class, 'edit'])->name('store.edit');
+    Route::patch('store', [SellerStoreController::class, 'update'])->name('store.update');
+    Route::post('store/toggle', [SellerStoreController::class, 'toggle'])->name('store.toggle');
 });
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
