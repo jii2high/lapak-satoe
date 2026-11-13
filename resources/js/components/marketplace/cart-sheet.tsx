@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -20,14 +20,38 @@ import {
 } from '@/lib/cart-storage';
 import { formatRupiah } from '@/lib/format';
 import { explore } from '@/routes';
+import { index as cartIndex } from '@/routes/cart';
 import { show as storeShow } from '@/routes/stores';
 
 export function CartSheet() {
     const items = useCart();
     const [open, setOpen] = useState(false);
+    const { auth, cart_count: serverCount } = usePage().props;
 
     const count = cartCount(items);
     const total = items.reduce((sum, item) => sum + item.price * item.qty, 0);
+
+    // Sudah masuk: badge pakai hitungan server, isi keranjang ada di /keranjang.
+    if (auth.user) {
+        return (
+            <Button
+                asChild
+                variant="ghost"
+                size="icon"
+                aria-label={`Keranjang, ${serverCount} item`}
+                className="relative text-white hover:bg-white/10 hover:text-white dark:text-white"
+            >
+                <Link href={cartIndex()}>
+                    <ShoppingCart aria-hidden className="size-5" />
+                    {serverCount > 0 && (
+                        <span className="absolute -top-0.5 -right-0.5 flex h-[18px] min-w-[18px] items-center justify-center bg-highlight px-1 text-xs font-bold text-highlight-foreground">
+                            {serverCount}
+                        </span>
+                    )}
+                </Link>
+            </Button>
+        );
+    }
 
     const groups = new Map<string, CartItem[]>();
 

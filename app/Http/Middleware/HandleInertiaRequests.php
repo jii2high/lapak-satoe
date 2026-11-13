@@ -2,12 +2,15 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\CartService;
 use App\Support\EmailMask;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
 {
+    public function __construct(private readonly CartService $carts) {}
+
     /**
      * The root template that's loaded on the first page visit.
      *
@@ -60,6 +63,7 @@ class HandleInertiaRequests extends Middleware
                 ],
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'cart_count' => $user === null ? 0 : $this->carts->count($user),
         ];
     }
 }

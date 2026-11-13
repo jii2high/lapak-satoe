@@ -5,6 +5,7 @@ import {
     Home,
     LayoutGrid,
     Package,
+    ReceiptText,
     Store,
     Tags,
 } from 'lucide-react';
@@ -27,6 +28,7 @@ import { dashboard as adminDashboard } from '@/routes/admin';
 import { index as adminApplications } from '@/routes/admin/applications';
 import { index as adminCategories } from '@/routes/admin/categories';
 import { dashboard as sellerDashboard } from '@/routes/seller';
+import { index as sellerOrders } from '@/routes/seller/orders';
 import { index as sellerProducts } from '@/routes/seller/products';
 import { edit as sellerStore } from '@/routes/seller/store';
 import type { NavItem } from '@/types';
@@ -52,6 +54,11 @@ export function AppSidebar() {
                       title: 'Produk',
                       href: sellerProducts(),
                       icon: Package,
+                  },
+                  {
+                      title: 'Pesanan',
+                      href: sellerOrders(),
+                      icon: ReceiptText,
                   },
                   {
                       title: 'Pengaturan lapak',

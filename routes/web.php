@@ -2,12 +2,16 @@
 
 use App\Http\Controllers\Admin\ApplicationController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Marketplace\CartController;
+use App\Http\Controllers\Marketplace\CheckoutController;
 use App\Http\Controllers\Marketplace\ExploreController;
 use App\Http\Controllers\Marketplace\HomeController;
+use App\Http\Controllers\Marketplace\OrderController as BuyerOrderController;
 use App\Http\Controllers\Marketplace\ProductController;
 use App\Http\Controllers\Marketplace\SearchController;
 use App\Http\Controllers\Marketplace\StoreController;
 use App\Http\Controllers\Marketplace\WishlistController;
+use App\Http\Controllers\Seller\OrderController as SellerOrderController;
 use App\Http\Controllers\Seller\ProductController as SellerProductController;
 use App\Http\Controllers\Seller\StoreController as SellerStoreController;
 use App\Http\Controllers\SellerApplicationController;
@@ -30,6 +34,18 @@ Route::middleware('auth')->group(function () {
     Route::post('daftar-seller', [SellerApplicationController::class, 'store'])
         ->middleware('email.verified')
         ->name('seller-application.store');
+
+    Route::get('keranjang', [CartController::class, 'index'])->name('cart.index');
+    Route::post('keranjang/merge', [CartController::class, 'merge'])->name('cart.merge');
+    Route::patch('keranjang/items/{item}', [CartController::class, 'update'])->name('cart.items.update');
+    Route::delete('keranjang/items/{item}', [CartController::class, 'destroy'])->name('cart.items.destroy');
+    Route::post('checkout/{store:slug}', [CheckoutController::class, 'store'])
+        ->middleware('throttle:checkout')
+        ->name('checkout.store');
+
+    Route::get('pesanan-saya', [BuyerOrderController::class, 'index'])->name('orders.index');
+    Route::post('orders/{order}/cancel', [BuyerOrderController::class, 'cancel'])->name('orders.cancel');
+    Route::post('orders/{order}/confirm', [BuyerOrderController::class, 'confirm'])->name('orders.confirm');
 });
 
 Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {
@@ -47,6 +63,12 @@ Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->g
     Route::get('store', [SellerStoreController::class, 'edit'])->name('store.edit');
     Route::patch('store', [SellerStoreController::class, 'update'])->name('store.update');
     Route::post('store/toggle', [SellerStoreController::class, 'toggle'])->name('store.toggle');
+
+    Route::get('orders', [SellerOrderController::class, 'index'])->name('orders.index');
+    Route::post('orders/{order}/accept', [SellerOrderController::class, 'accept'])->name('orders.accept');
+    Route::post('orders/{order}/reject', [SellerOrderController::class, 'reject'])->name('orders.reject');
+    Route::post('orders/{order}/cancel', [SellerOrderController::class, 'cancel'])->name('orders.cancel');
+    Route::post('orders/{order}/complete', [SellerOrderController::class, 'complete'])->name('orders.complete');
 });
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {

@@ -68,3 +68,62 @@ export type ExploreFilters = {
     min: number | null;
     max: number | null;
 };
+
+export type OrderStatus =
+    | 'unconfirmed'
+    | 'pending'
+    | 'awaiting_buyer'
+    | 'completed'
+    | 'rejected'
+    | 'cancelled'
+    | 'disputed';
+
+export type OrderItemData = {
+    name: string;
+    price: number;
+    qty: number;
+    subtotal: number;
+};
+
+export type OrderData = {
+    id: number;
+    code: string;
+    status: OrderStatus;
+    total: number;
+    created_at: string | null;
+    expires_at: string;
+    cancel_note: string | null;
+    store: {
+        name: string;
+        slug: string;
+    };
+    buyer: {
+        username: string;
+    };
+    items: OrderItemData[];
+};
+
+export type CartItemData = {
+    id: number;
+    product_id: number;
+    name: string;
+    price: number;
+    qty: number;
+    subtotal: number;
+    available: number;
+    image_url: string | null;
+    problem: string | null;
+};
+
+export type CartGroupData = {
+    store: {
+        id: number;
+        name: string;
+        slug: string;
+        status: StoreStatus;
+        is_suspended: boolean;
+    };
+    subtotal: number;
+    problem: string | null;
+    items: CartItemData[];
+};

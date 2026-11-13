@@ -124,3 +124,17 @@ export function setCartQty(productId: number, qty: number): void {
 export function removeFromCart(productId: number): void {
     write(read().filter((item) => item.productId !== productId));
 }
+
+export function clearCart(): void {
+    write([]);
+}
+
+/**
+ * Bentuk minimal yang diterima POST /keranjang/merge.
+ */
+export function cartPayload(): { product_id: number; qty: number }[] {
+    return read().map((item) => ({
+        product_id: item.productId,
+        qty: item.qty,
+    }));
+}

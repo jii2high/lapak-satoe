@@ -1,5 +1,12 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Compass, Heart, Home, Search, UserRound } from 'lucide-react';
+import {
+    Compass,
+    Heart,
+    Home,
+    ReceiptText,
+    Search,
+    UserRound,
+} from 'lucide-react';
 import { type PropsWithChildren, useEffect, useState } from 'react';
 import { CartSheet } from '@/components/marketplace/cart-sheet';
 import { SearchInput } from '@/components/marketplace/search-input';
@@ -16,6 +23,7 @@ import { useCurrentUrl } from '@/hooks/use-current-url';
 import { cn } from '@/lib/utils';
 import { explore, home, login, register, terms } from '@/routes';
 import { edit as account } from '@/routes/account';
+import { index as orders } from '@/routes/orders';
 import { index as wishlist } from '@/routes/wishlist';
 
 const headerLink =
@@ -82,10 +90,10 @@ export default function PublicLayout({ children }: PropsWithChildren) {
             active: isCurrentUrl(explore()),
         },
         {
-            title: 'Wishlist',
-            href: wishlist(),
-            icon: Heart,
-            active: isCurrentOrParentUrl(wishlist()),
+            title: 'Pesanan',
+            href: orders(),
+            icon: ReceiptText,
+            active: isCurrentOrParentUrl(orders()),
         },
         {
             title: 'Akun',
