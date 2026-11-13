@@ -294,6 +294,15 @@
     }
 }
 
+/* Inertia injects the bar styles at runtime, so these overrides need !important. */
+#nprogress .bar {
+    height: 3px !important;
+}
+
+#nprogress .peg {
+    box-shadow: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .awning-intro {
         animation: none;

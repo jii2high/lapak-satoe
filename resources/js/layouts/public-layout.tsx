@@ -111,6 +111,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                 <div className="mx-auto flex h-14 w-full max-w-[1280px] items-center gap-2 px-4 md:h-16 md:gap-6 md:px-6 lg:px-8">
                     <Link
                         href={home()}
+                        prefetch
                         className="flex min-h-11 shrink-0 items-center gap-2 font-display text-xl font-bold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
                     >
                         <AppLogoIcon aria-hidden className="size-8 shrink-0" />
@@ -119,6 +120,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
 
                     <Link
                         href={explore()}
+                        prefetch
                         className={cn(headerLink, 'hidden md:flex')}
                     >
                         Jelajah
@@ -136,6 +138,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
 
                         <Link
                             href={wishlist()}
+                            prefetch
                             aria-label="Wishlist"
                             className={iconLink}
                         >
@@ -157,6 +160,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                             <>
                                 <Link
                                     href={account()}
+                                    prefetch
                                     aria-label="Akun"
                                     className={cn(iconLink, 'md:hidden')}
                                 >
@@ -164,6 +168,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                                 </Link>
                                 <Link
                                     href={account()}
+                                    prefetch
                                     className={cn(
                                         headerLink,
                                         'hidden max-w-40 gap-2 md:flex',
@@ -182,6 +187,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                             <>
                                 <Link
                                     href={login()}
+                                    prefetch
                                     aria-label="Masuk"
                                     className={cn(iconLink, 'md:hidden')}
                                 >
@@ -189,6 +195,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                                 </Link>
                                 <Link
                                     href={login()}
+                                    prefetch
                                     className={cn(
                                         headerLink,
                                         'hidden border border-white/70 md:flex',
@@ -198,6 +205,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                                 </Link>
                                 <Link
                                     href={register()}
+                                    prefetch
                                     className="hidden min-h-11 items-center rounded-md bg-secondary px-3 font-semibold text-secondary-foreground hover:bg-[#CFE0D4] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white md:flex"
                                 >
                                     Daftar
@@ -225,6 +233,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                     </p>
                     <Link
                         href={terms()}
+                        prefetch
                         className="mt-1 flex min-h-11 items-center self-start underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
                     >
                         Syarat dan ketentuan
@@ -241,6 +250,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                         <li key={item.title}>
                             <Link
                                 href={item.href}
+                                prefetch
                                 aria-current={item.active ? 'page' : undefined}
                                 className={cn(
                                     'flex min-h-14 flex-col items-center justify-center gap-0.5 border-t-2 text-xs',

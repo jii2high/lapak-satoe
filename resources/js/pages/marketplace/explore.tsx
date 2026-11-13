@@ -17,6 +17,7 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/sheet';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { explore } from '@/routes';
 import type {
@@ -321,7 +322,29 @@ export default function Explore({
                         </div>
                     )}
 
-                    {bothEmpty ? (
+                    {form.processing ? (
+                        <div
+                            aria-busy="true"
+                            className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4 md:mt-0 lg:grid-cols-5"
+                        >
+                            <span className="sr-only" role="status">
+                                Memuat hasil
+                            </span>
+                            {Array.from({ length: 10 }, (_, index) => (
+                                <div
+                                    key={index}
+                                    className="overflow-hidden rounded-md border border-border bg-card"
+                                >
+                                    <Skeleton className="aspect-square rounded-none" />
+                                    <div className="grid gap-2 p-3">
+                                        <Skeleton className="h-4 w-4/5" />
+                                        <Skeleton className="h-5 w-1/2" />
+                                        <Skeleton className="h-3 w-2/3" />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : bothEmpty ? (
                         <div className="mt-6 border border-border bg-card px-4 py-10 text-center">
                             <SearchX
                                 aria-hidden

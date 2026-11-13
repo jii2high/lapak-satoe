@@ -16,6 +16,7 @@ export function StoreCard({ store }: { store: StoreCardData }) {
 
             <Link
                 href={storeShow.url(store.slug)}
+                prefetch
                 className="flex flex-col gap-3 p-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             >
                 <div className="flex items-center gap-3">

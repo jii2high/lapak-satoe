@@ -18,6 +18,7 @@ export function ProductCard({ product }: { product: ProductCardData }) {
 
             <Link
                 href={productShow.url(product.id)}
+                prefetch
                 className="block focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             >
                 <div className="relative aspect-square overflow-hidden bg-secondary">
@@ -59,6 +60,7 @@ export function ProductCard({ product }: { product: ProductCardData }) {
 
             <Link
                 href={storeShow.url(product.store.slug)}
+                prefetch
                 className="block px-3 pt-1 pb-3 text-xs text-muted-foreground hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             >
                 {product.store.name}

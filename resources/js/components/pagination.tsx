@@ -65,6 +65,7 @@ export function Pagination({
                     <Link
                         key={index}
                         href={link.url}
+                        prefetch
                         preserveScroll
                         aria-current={link.active ? 'page' : undefined}
                         className={className}
