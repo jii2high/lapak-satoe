@@ -19,4 +19,17 @@ enum OrderStatus: string
     {
         return array_column(self::cases(), 'value');
     }
+
+    /**
+     * Status yang masih berjalan, dipakai penjaga hapus user (PRD BR-21).
+     *
+     * @return array<int, string>
+     */
+    public static function active(): array
+    {
+        return array_map(
+            fn (self $status) => $status->value,
+            [self::Unconfirmed, self::Pending, self::AwaitingBuyer, self::Disputed],
+        );
+    }
 }

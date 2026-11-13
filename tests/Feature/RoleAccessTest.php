@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\Role;
+use App\Models\Store;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -28,6 +29,7 @@ class RoleAccessTest extends TestCase
     public function test_sellers_can_access_the_seller_dashboard()
     {
         $user = User::factory()->withRole(Role::Seller, active: true)->create();
+        Store::factory()->open()->for($user)->create();
 
         $this->actingAs($user)->get(route('seller.dashboard'))->assertOk();
     }

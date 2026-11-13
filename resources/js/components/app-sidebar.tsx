@@ -9,6 +9,7 @@ import {
     ReceiptText,
     Store,
     Tags,
+    Users,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
@@ -29,6 +30,7 @@ import { dashboard as adminDashboard } from '@/routes/admin';
 import { index as adminApplications } from '@/routes/admin/applications';
 import { index as adminCategories } from '@/routes/admin/categories';
 import { index as adminReports } from '@/routes/admin/reports';
+import { index as adminUsers } from '@/routes/admin/users';
 import { dashboard as sellerDashboard } from '@/routes/seller';
 import { index as sellerOrders } from '@/routes/seller/orders';
 import { index as sellerProducts } from '@/routes/seller/products';
@@ -85,6 +87,11 @@ export function AppSidebar() {
                       title: 'Kategori',
                       href: adminCategories(),
                       icon: Tags,
+                  },
+                  {
+                      title: 'Pengguna',
+                      href: adminUsers(),
+                      icon: Users,
                   },
               ]
             : []),

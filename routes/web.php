@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Admin\ApplicationController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Marketplace\CartController;
 use App\Http\Controllers\Marketplace\CheckoutController;
 use App\Http\Controllers\Marketplace\ExploreController;
@@ -14,6 +16,7 @@ use App\Http\Controllers\Marketplace\StoreController;
 use App\Http\Controllers\Marketplace\WishlistController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\Seller\DashboardController as SellerDashboardController;
 use App\Http\Controllers\Seller\OrderController as SellerOrderController;
 use App\Http\Controllers\Seller\ProductController as SellerProductController;
 use App\Http\Controllers\Seller\StoreController as SellerStoreController;
@@ -60,7 +63,8 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {
     Route::redirect('/', '/seller/dashboard')->name('root');
-    Route::inertia('dashboard', 'seller/dashboard')->name('dashboard');
+    Route::get('dashboard', [SellerDashboardController::class, 'index'])->name('dashboard');
+    Route::get('data/dashboard', [SellerDashboardController::class, 'data'])->name('data.dashboard');
 
     Route::get('products', [SellerProductController::class, 'index'])->name('products.index');
     Route::get('products/create', [SellerProductController::class, 'create'])->name('products.create');
@@ -83,7 +87,15 @@ Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->g
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::redirect('/', '/admin/dashboard')->name('root');
-    Route::inertia('dashboard', 'admin/dashboard')->name('dashboard');
+    Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('data/dashboard', [AdminDashboardController::class, 'data'])->name('data.dashboard');
+
+    Route::get('users', [UserController::class, 'index'])->name('users.index');
+    Route::patch('users/{user}/email', [UserController::class, 'updateEmail'])->name('users.email.update');
+    Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset');
+    Route::post('users/{user}/toggle', [UserController::class, 'toggle'])->name('users.toggle');
+    Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+
     Route::get('categories', [CategoryController::class, 'index'])->name('categories.index');
     Route::post('categories', [CategoryController::class, 'store'])->name('categories.store');
     Route::patch('categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
