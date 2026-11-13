@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Seller;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Seller\BulkProductRequest;
 use App\Http\Requests\Seller\StoreProductRequest;
 use App\Http\Requests\Seller\UpdateProductRequest;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Store;
 use App\Support\ImageStorage;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -22,6 +24,38 @@ use Throwable;
 
 class ProductController extends Controller
 {
+    public function index(Request $request): Response
+    {
+        $store = $this->currentStore($request);
+        $query = trim((string) $request->query('q', ''));
+        $status = $request->query('status');
+        $status = is_string($status) && in_array($status, ['active', 'inactive', 'suspended'], true)
+            ? $status
+            : 'all';
+        $pattern = '%'.addcslashes($query, '%_\\').'%';
+
+        $products = $store->products()
+            ->with(['images', 'category'])
+            ->when($query !== '', fn (Builder $sub) => $sub->where('name', 'like', $pattern))
+            ->when($status === 'active', fn (Builder $sub) => $sub
+                ->where('is_active', true)
+                ->where('is_suspended', false))
+            ->when($status === 'inactive', fn (Builder $sub) => $sub->where('is_active', false))
+            ->when($status === 'suspended', fn (Builder $sub) => $sub->where('is_suspended', true))
+            ->latest()
+            ->paginate(20)
+            ->withQueryString()
+            ->through(fn (Product $product) => $this->presentRow($product));
+
+        return Inertia::render('seller/products/index', [
+            'products' => $products,
+            'filters' => [
+                'q' => $query,
+                'status' => $status,
+            ],
+        ]);
+    }
+
     public function create(Request $request): Response
     {
         Gate::authorize('create', Product::class);
@@ -61,7 +95,7 @@ class ProductController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Produk ditambahkan.']);
 
-        return back();
+        return redirect()->route('seller.products.index');
     }
 
     public function edit(Request $request, Product $product): Response
@@ -139,7 +173,7 @@ class ProductController extends Controller
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Produk diperbarui.']);
 
-        return back();
+        return redirect()->route('seller.products.index');
     }
 
     public function destroy(Request $request, Product $product): RedirectResponse
@@ -149,6 +183,48 @@ class ProductController extends Controller
         $product->delete();
 
         Inertia::flash('toast', ['type' => 'success', 'message' => 'Produk dihapus.']);
+
+        return back();
+    }
+
+    public function bulk(BulkProductRequest $request): RedirectResponse
+    {
+        Gate::authorize('create', Product::class);
+
+        $store = $this->currentStore($request);
+        $action = (string) $request->input('action');
+        $ids = $request->input('ids');
+        $ids = is_array($ids) ? array_map(fn ($id) => (int) $id, $ids) : [];
+        $products = $store->products()->whereIn('id', $ids)->get();
+        $count = 0;
+
+        if ($action === 'delete') {
+            foreach ($products as $product) {
+                $product->delete();
+                $count++;
+            }
+        } else {
+            foreach ($products as $product) {
+                if ($action === 'activate' && $product->is_suspended) {
+                    continue;
+                }
+
+                $product->update(['is_active' => $action === 'activate']);
+                $count++;
+            }
+        }
+
+        $message = match ($action) {
+            'activate' => $count.' produk diaktifkan.',
+            'deactivate' => $count.' produk dinonaktifkan.',
+            'delete' => $count.' produk dihapus.',
+            default => 'Tidak ada produk yang diubah.',
+        };
+
+        Inertia::flash('toast', [
+            'type' => $count > 0 ? 'success' : 'info',
+            'message' => $count > 0 ? $message : 'Tidak ada produk yang diubah.',
+        ]);
 
         return back();
     }
@@ -200,6 +276,28 @@ class ProductController extends Controller
         foreach ($paths as $path) {
             ImageStorage::delete($path);
         }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function presentRow(Product $product): array
+    {
+        $image = $product->images->first();
+
+        return [
+            'id' => $product->id,
+            'name' => $product->name,
+            'category' => $product->category->name,
+            'price' => $product->price,
+            'stock' => $product->stock,
+            'reserved' => $product->reserved,
+            'is_active' => $product->is_active,
+            'is_suspended' => $product->is_suspended,
+            'image_url' => $image === null
+                ? null
+                : Storage::disk('public')->url($image->path),
+        ];
     }
 
     /**

@@ -36,8 +36,10 @@ Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->g
     Route::redirect('/', '/seller/dashboard')->name('root');
     Route::inertia('dashboard', 'seller/dashboard')->name('dashboard');
 
+    Route::get('products', [SellerProductController::class, 'index'])->name('products.index');
     Route::get('products/create', [SellerProductController::class, 'create'])->name('products.create');
     Route::post('products', [SellerProductController::class, 'store'])->name('products.store');
+    Route::post('products/bulk', [SellerProductController::class, 'bulk'])->name('products.bulk');
     Route::get('products/{product}/edit', [SellerProductController::class, 'edit'])->name('products.edit');
     Route::patch('products/{product}', [SellerProductController::class, 'update'])->name('products.update');
     Route::delete('products/{product}', [SellerProductController::class, 'destroy'])->name('products.destroy');

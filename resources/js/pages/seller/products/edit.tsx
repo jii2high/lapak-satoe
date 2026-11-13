@@ -3,7 +3,10 @@ import {
     ProductForm,
     type ProductDetail,
 } from '@/components/seller/product-form';
-import { edit as editProduct } from '@/routes/seller/products';
+import {
+    edit as editProduct,
+    index as products,
+} from '@/routes/seller/products';
 
 type Props = {
     product: ProductDetail;
@@ -33,6 +36,10 @@ export default function SellerProductEdit({ product, categories }: Props) {
 
 SellerProductEdit.layout = (props: Props) => ({
     breadcrumbs: [
+        {
+            title: 'Produk',
+            href: products(),
+        },
         {
             title: 'Ubah produk',
             href: editProduct(props.product.id),

@@ -46,6 +46,7 @@ class ProductManagementTest extends TestCase
 
     public function test_guests_are_redirected_to_login()
     {
+        $this->get(route('seller.products.index'))->assertRedirect(route('login'));
         $this->get(route('seller.products.create'))->assertRedirect(route('login'));
         $this->post(route('seller.products.store'), [])->assertRedirect(route('login'));
     }
@@ -55,12 +56,60 @@ class ProductManagementTest extends TestCase
         $buyer = User::factory()->create();
 
         $this->actingAs($buyer)
-            ->get(route('seller.products.create'))
+            ->get(route('seller.products.index'))
             ->assertRedirect(route('home'));
 
         $this->actingAs($buyer)
             ->post(route('seller.products.store'), ['name' => 'Produk Palsu'])
             ->assertRedirect(route('home'));
+    }
+
+    public function test_seller_only_sees_products_from_their_own_store()
+    {
+        $seller = $this->seller();
+        $store = $this->storeFor($seller);
+        Product::factory()->for($store)->create(['name' => 'Kopi Sendiri']);
+
+        $otherStore = Store::factory()->create();
+        Product::factory()->for($otherStore)->create(['name' => 'Kopi Lapak Lain']);
+
+        $this->actingAs($seller)
+            ->get(route('seller.products.index'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('seller/products/index')
+                ->has('products.data', 1)
+                ->where('products.data.0.name', 'Kopi Sendiri'));
+    }
+
+    public function test_product_list_can_be_searched_and_filtered_by_status()
+    {
+        $seller = $this->seller();
+        $store = $this->storeFor($seller);
+        Product::factory()->for($store)->create(['name' => 'Kopi Susu', 'is_active' => true]);
+        Product::factory()->for($store)->inactive()->create(['name' => 'Teh Manis']);
+        Product::factory()->for($store)->suspended()->create(['name' => 'Roti Bakar']);
+
+        $this->actingAs($seller)
+            ->get(route('seller.products.index', ['status' => 'active']))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('products.data', 1)
+                ->where('products.data.0.name', 'Kopi Susu'));
+
+        $this->actingAs($seller)
+            ->get(route('seller.products.index', ['status' => 'suspended']))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('products.data', 1)
+                ->where('products.data.0.name', 'Roti Bakar'));
+
+        $this->actingAs($seller)
+            ->get(route('seller.products.index', ['q' => 'Teh']))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('products.data', 1)
+                ->where('products.data.0.name', 'Teh Manis'));
     }
 
     public function test_a_product_can_be_created_with_resized_images()
@@ -77,7 +126,7 @@ class ProductManagementTest extends TestCase
                 UploadedFile::fake()->image('belakang.png', 800, 800),
             ]))
             ->assertSessionHasNoErrors()
-            ->assertRedirect();
+            ->assertRedirect(route('seller.products.index'));
 
         $product = Product::query()->firstOrFail();
 
@@ -201,7 +250,7 @@ class ProductManagementTest extends TestCase
                 'images' => [UploadedFile::fake()->image('tambahan.jpg', 600, 600)],
             ])
             ->assertSessionHasNoErrors()
-            ->assertRedirect();
+            ->assertRedirect(route('seller.products.index'));
 
         $product->refresh();
 
@@ -371,5 +420,83 @@ class ProductManagementTest extends TestCase
             ->assertRedirect();
 
         $this->assertSoftDeleted('products', ['id' => $product->id]);
+    }
+
+    public function test_bulk_activate_skips_suspended_products()
+    {
+        Storage::fake('public');
+
+        $seller = $this->seller();
+        $store = $this->storeFor($seller);
+        $normal = Product::factory()->for($store)->inactive()->create();
+        $suspended = Product::factory()->for($store)->inactive()->suspended()->create();
+
+        $this->actingAs($seller)
+            ->post(route('seller.products.bulk'), [
+                'action' => 'activate',
+                'ids' => [$normal->id, $suspended->id],
+            ])
+            ->assertRedirect();
+
+        $this->assertTrue($normal->refresh()->is_active);
+        $this->assertFalse($suspended->refresh()->is_active);
+    }
+
+    public function test_bulk_actions_only_touch_products_of_the_seller()
+    {
+        Storage::fake('public');
+
+        $seller = $this->seller();
+        $store = $this->storeFor($seller);
+        $own = Product::factory()->for($store)->create(['is_active' => true]);
+
+        $otherStore = Store::factory()->create();
+        $foreign = Product::factory()->for($otherStore)->create(['is_active' => true]);
+
+        $this->actingAs($seller)
+            ->post(route('seller.products.bulk'), [
+                'action' => 'deactivate',
+                'ids' => [$own->id, $foreign->id],
+            ])
+            ->assertRedirect();
+
+        $this->assertFalse($own->refresh()->is_active);
+        $this->assertTrue($foreign->refresh()->is_active);
+    }
+
+    public function test_bulk_delete_soft_deletes_the_selected_products()
+    {
+        Storage::fake('public');
+
+        $seller = $this->seller();
+        $store = $this->storeFor($seller);
+        $first = Product::factory()->for($store)->create();
+        $second = Product::factory()->for($store)->create();
+
+        $this->actingAs($seller)
+            ->post(route('seller.products.bulk'), [
+                'action' => 'delete',
+                'ids' => [$first->id, $second->id],
+            ])
+            ->assertRedirect();
+
+        $this->assertSoftDeleted('products', ['id' => $first->id]);
+        $this->assertSoftDeleted('products', ['id' => $second->id]);
+    }
+
+    public function test_bulk_action_must_be_known()
+    {
+        Storage::fake('public');
+
+        $seller = $this->seller();
+        $store = $this->storeFor($seller);
+        $product = Product::factory()->for($store)->create();
+
+        $this->actingAs($seller)
+            ->post(route('seller.products.bulk'), [
+                'action' => 'hapus-semua',
+                'ids' => [$product->id],
+            ])
+            ->assertSessionHasErrors('action');
     }
 }

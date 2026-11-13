@@ -1,6 +1,9 @@
 import { Head } from '@inertiajs/react';
 import { ProductForm } from '@/components/seller/product-form';
-import { create as createProduct } from '@/routes/seller/products';
+import {
+    create as createProduct,
+    index as products,
+} from '@/routes/seller/products';
 
 type Props = {
     categories: { id: number; name: string }[];
@@ -30,6 +33,10 @@ export default function SellerProductCreate({ categories }: Props) {
 
 SellerProductCreate.layout = {
     breadcrumbs: [
+        {
+            title: 'Produk',
+            href: products(),
+        },
         {
             title: 'Tambah produk',
             href: createProduct(),
