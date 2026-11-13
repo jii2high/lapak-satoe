@@ -213,7 +213,7 @@ export function SearchInput({
             {showPanel && (
                 <div
                     id={`${inputId}-panel`}
-                    className="absolute inset-x-0 top-full z-30 mt-1 max-h-[70vh] overflow-y-auto rounded-md border border-border bg-popover shadow-[0_8px_24px_rgba(16,24,18,.18)]"
+                    className="absolute inset-x-0 top-full z-30 mt-1 max-h-[70vh] overflow-y-auto rounded-md border border-border bg-popover text-popover-foreground shadow-[0_8px_24px_rgba(16,24,18,.18)]"
                 >
                     {loading && (
                         <p className="flex items-center gap-2 px-4 py-3 text-sm text-muted-foreground">
