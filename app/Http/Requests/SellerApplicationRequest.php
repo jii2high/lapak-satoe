@@ -43,6 +43,26 @@ class SellerApplicationRequest extends FormRequest
     }
 
     /**
+     * @return array{full_name: string, nis: string, whatsapp: string, store_name: string, description: string, categories: array<int, int>}
+     */
+    public function payload(): array
+    {
+        $categories = $this->input('categories');
+        $categories = is_array($categories)
+            ? array_map(fn ($id) => (int) $id, $categories)
+            : [];
+
+        return [
+            'full_name' => (string) $this->string('full_name'),
+            'nis' => (string) $this->string('nis'),
+            'whatsapp' => (string) $this->string('whatsapp'),
+            'store_name' => (string) $this->string('store_name'),
+            'description' => (string) $this->string('description'),
+            'categories' => $categories,
+        ];
+    }
+
+    /**
      * @return array<string, string>
      */
     public function messages(): array

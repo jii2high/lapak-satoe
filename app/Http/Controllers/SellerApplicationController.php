@@ -36,7 +36,7 @@ class SellerApplicationController extends Controller
     {
         $this->applications->submit(
             $request->user(),
-            $request->safe()->only(['full_name', 'nis', 'whatsapp', 'store_name', 'description', 'categories']),
+            $request->payload(),
             $request->file('product_photos'),
             $request->file('student_card'),
         );

@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $user_id
+ * @property Role $role
+ */
 #[Fillable(['user_id', 'role'])]
 class UserRole extends Model
 {
