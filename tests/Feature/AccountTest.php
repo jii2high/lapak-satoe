@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Enums\ApplicationStatus;
 use App\Enums\Role;
+use App\Models\SellerApplication;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -32,7 +34,31 @@ class AccountTest extends TestCase
                 ->where('auth.user.email_verified', true)
                 ->missing('auth.user.email')
                 ->has('roles', 1)
-                ->where('roles.0.value', Role::Buyer->value),
+                ->where('roles.0.value', Role::Buyer->value)
+                ->where('seller_application', null),
+            );
+    }
+
+    public function test_account_page_shows_a_pending_seller_application()
+    {
+        $user = User::factory()->create();
+
+        SellerApplication::create([
+            'user_id' => $user->id,
+            'full_name' => 'Budi Santoso',
+            'nis' => '12345',
+            'whatsapp' => '081234567890',
+            'store_name' => 'Kopi Budi',
+            'description' => 'Kopi susu dan teh manis.',
+            'status' => ApplicationStatus::Pending,
+            'agreed_terms_at' => now(),
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('account.edit'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('seller_application.status', 'pending'),
             );
     }
 

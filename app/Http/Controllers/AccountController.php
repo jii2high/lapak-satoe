@@ -18,7 +18,10 @@ class AccountController extends Controller
 {
     public function edit(Request $request): Response
     {
-        $roles = $request->user()
+        $user = $request->user();
+        $application = $user->sellerApplication;
+
+        $roles = $user
             ->roles()
             ->get()
             ->map(fn (UserRole $role) => [
@@ -30,6 +33,9 @@ class AccountController extends Controller
 
         return Inertia::render('settings/account', [
             'roles' => $roles,
+            'seller_application' => $application === null ? null : [
+                'status' => $application->status->value,
+            ],
         ]);
     }
 

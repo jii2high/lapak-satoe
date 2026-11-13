@@ -32,8 +32,13 @@ type AccountRole = {
     label: string;
 };
 
+type SellerApplicationSummary = {
+    status: string;
+};
+
 type Props = {
     roles: AccountRole[];
+    seller_application: SellerApplicationSummary | null;
 };
 
 type EditMode = 'display-name' | 'username' | 'email' | 'password' | null;
@@ -66,13 +71,17 @@ const dialogCopy: Record<
     },
 };
 
-export default function Account({ roles }: Props) {
+export default function Account({ roles, seller_application }: Props) {
     const { auth } = usePage().props;
     const user = auth.user;
     const [editing, setEditing] = useState<EditMode>(null);
     const [otpOpen, setOtpOpen] = useState(false);
+    const [continueOpen, setContinueOpen] = useState(false);
+    const [verifyConfirmOpen, setVerifyConfirmOpen] = useState(false);
+    const [verifyForSeller, setVerifyForSeller] = useState(false);
 
     const isSeller = roles.some((role) => role.value === 'seller');
+    const applicationPending = seller_application?.status === 'pending';
 
     const displayNameForm = useForm({ display_name: user.display_name });
     const usernameForm = useForm({ username: user.username });
@@ -223,7 +232,10 @@ export default function Account({ roles }: Props) {
                                     variant="outline"
                                     size="sm"
                                     className="shrink-0 self-start sm:self-auto"
-                                    onClick={() => setOtpOpen(true)}
+                                    onClick={() => {
+                                        setVerifyForSeller(false);
+                                        setOtpOpen(true);
+                                    }}
                                 >
                                     Verifikasi email
                                 </Button>
@@ -301,7 +313,19 @@ export default function Account({ roles }: Props) {
                         Mode menentukan halaman yang kamu buka setelah masuk.
                     </p>
 
-                    {!isSeller && (
+                    {!isSeller && applicationPending && (
+                        <div className="mt-4 border border-border bg-card px-4 py-4">
+                            <p className="font-medium">
+                                Pendaftaranmu sedang diproses
+                            </p>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                                Admin akan meninjau datamu. Hasilnya muncul di
+                                notifikasi.
+                            </p>
+                        </div>
+                    )}
+
+                    {!isSeller && !applicationPending && (
                         <div className="mt-4 flex flex-col gap-3 border border-border bg-card px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
                             <div>
                                 <p className="font-medium">
@@ -312,17 +336,100 @@ export default function Account({ roles }: Props) {
                                     tampil di katalog.
                                 </p>
                             </div>
-                            <Button asChild className="shrink-0">
-                                <Link href={sellerApplication()}>
+                            {user.email_verified ? (
+                                <Button asChild className="shrink-0">
+                                    <Link href={sellerApplication()}>
+                                        Jadi penjual
+                                    </Link>
+                                </Button>
+                            ) : (
+                                <Button
+                                    type="button"
+                                    className="shrink-0"
+                                    onClick={() => setVerifyConfirmOpen(true)}
+                                >
                                     Jadi penjual
-                                </Link>
-                            </Button>
+                                </Button>
+                            )}
                         </div>
                     )}
                 </section>
             </div>
 
-            <EmailVerificationDialog open={otpOpen} onOpenChange={setOtpOpen} />
+            <Dialog
+                open={verifyConfirmOpen}
+                onOpenChange={setVerifyConfirmOpen}
+            >
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle className="font-display text-xl">
+                            Email belum terverifikasi
+                        </DialogTitle>
+                        <DialogDescription>
+                            Verifikasi dulu untuk mendaftar jadi penjual.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <DialogFooter>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setVerifyConfirmOpen(false)}
+                        >
+                            Nanti saja
+                        </Button>
+                        <Button
+                            type="button"
+                            onClick={() => {
+                                setVerifyConfirmOpen(false);
+                                setVerifyForSeller(true);
+                                setOtpOpen(true);
+                            }}
+                        >
+                            Verifikasi
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <EmailVerificationDialog
+                open={otpOpen}
+                onOpenChange={setOtpOpen}
+                onVerified={() => {
+                    if (verifyForSeller) {
+                        setContinueOpen(true);
+                    }
+                }}
+            />
+
+            <Dialog open={continueOpen} onOpenChange={setContinueOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle className="font-display text-xl">
+                            Emailmu sudah terverifikasi
+                        </DialogTitle>
+                        <DialogDescription>
+                            Lanjut isi formulir pendaftaran penjual sekarang?
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <DialogFooter>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setContinueOpen(false)}
+                        >
+                            Nanti saja
+                        </Button>
+                        <Button
+                            type="button"
+                            onClick={() => router.visit(sellerApplication())}
+                        >
+                            Isi formulir
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             <Dialog
                 open={editing !== null}
