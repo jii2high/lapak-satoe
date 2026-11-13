@@ -10,6 +10,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\Store;
 use App\Models\User;
+use App\Notifications\OrderPlaced;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -51,6 +52,8 @@ class CheckoutService
         }
 
         $order->load('items', 'buyer');
+
+        $store->user?->notify(new OrderPlaced($order));
 
         return $this->whatsApp->orderUrl($store, $order);
     }

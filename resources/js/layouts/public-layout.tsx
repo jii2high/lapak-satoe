@@ -10,6 +10,7 @@ import {
 import { type PropsWithChildren, useEffect, useState } from 'react';
 import { CartSheet } from '@/components/marketplace/cart-sheet';
 import { SearchInput } from '@/components/marketplace/search-input';
+import { NotificationBell } from '@/components/notification-bell';
 import { Button } from '@/components/ui/button';
 import {
     Sheet,
@@ -140,6 +141,15 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                         </Link>
 
                         <CartSheet />
+
+                        {auth.user && (
+                            <NotificationBell
+                                triggerClassName={cn(
+                                    iconLink,
+                                    'text-white hover:bg-white/10 hover:text-white dark:text-white',
+                                )}
+                            />
+                        )}
 
                         {auth.user ? (
                             <>

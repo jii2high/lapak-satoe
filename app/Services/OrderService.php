@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Enums\OrderStatus;
 use App\Models\Order;
 use App\Models\Product;
+use App\Notifications\OrderAwaitingBuyer;
+use App\Notifications\OrderCancelled;
 use Closure;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -48,6 +50,8 @@ class OrderService
 
             $locked->update(['status' => OrderStatus::Rejected]);
         });
+
+        $order->buyer?->notify(new OrderCancelled($order, 'rejected', forSeller: false));
     }
 
     /**
@@ -65,6 +69,8 @@ class OrderService
                 'cancelled_by' => 'buyer',
             ]);
         });
+
+        $order->store->user?->notify(new OrderCancelled($order, 'buyer', forSeller: true));
     }
 
     /**
@@ -83,6 +89,8 @@ class OrderService
                 'cancel_note' => $note,
             ]);
         });
+
+        $order->buyer?->notify(new OrderCancelled($order, 'seller', forSeller: false));
     }
 
     /**
@@ -99,6 +107,34 @@ class OrderService
                 'auto_confirm_at' => now()->addHours((int) config('lapak.order.auto_confirm_after_hours')),
             ]);
         });
+
+        $order->buyer?->notify(new OrderAwaitingBuyer($order));
+    }
+
+    /**
+     * BR-07, BR-22. Aktor sistem, dipakai `orders:expire`.
+     *
+     * @throws ValidationException
+     */
+    public function expire(Order $order): void
+    {
+        $this->transition($order, [OrderStatus::Unconfirmed, OrderStatus::Pending], function (Order $locked): void {
+            $unconfirmed = $locked->status === OrderStatus::Unconfirmed;
+
+            $this->applyStock(
+                $locked,
+                stock: $unconfirmed ? 0 : 1,
+                reserved: $unconfirmed ? -1 : 0,
+            );
+
+            $locked->update([
+                'status' => OrderStatus::Cancelled,
+                'cancelled_by' => 'system',
+            ]);
+        });
+
+        $order->buyer?->notify(new OrderCancelled($order, 'expired', forSeller: false));
+        $order->store->user?->notify(new OrderCancelled($order, 'expired', forSeller: true));
     }
 
     /**

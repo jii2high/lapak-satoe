@@ -11,6 +11,7 @@ use App\Http\Controllers\Marketplace\ProductController;
 use App\Http\Controllers\Marketplace\SearchController;
 use App\Http\Controllers\Marketplace\StoreController;
 use App\Http\Controllers\Marketplace\WishlistController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Seller\OrderController as SellerOrderController;
 use App\Http\Controllers\Seller\ProductController as SellerProductController;
 use App\Http\Controllers\Seller\StoreController as SellerStoreController;
@@ -46,6 +47,9 @@ Route::middleware('auth')->group(function () {
     Route::get('pesanan-saya', [BuyerOrderController::class, 'index'])->name('orders.index');
     Route::post('orders/{order}/cancel', [BuyerOrderController::class, 'cancel'])->name('orders.cancel');
     Route::post('orders/{order}/confirm', [BuyerOrderController::class, 'confirm'])->name('orders.confirm');
+
+    Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('notifications/read', [NotificationController::class, 'read'])->name('notifications.read');
 });
 
 Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {
