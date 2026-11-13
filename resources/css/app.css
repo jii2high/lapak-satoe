@@ -305,4 +305,17 @@
         transition-duration: 0.01ms !important;
         animation-duration: 0.01ms !important;
     }
+
+    /* indikator loading tetap terbaca, bukan strobo */
+    .animate-spin {
+        animation-duration: 1s !important;
+    }
+
+    .animate-pulse {
+        animation-duration: 2s !important;
+    }
+
+    .animate-caret-blink {
+        animation-duration: 1.25s !important;
+    }
 }
