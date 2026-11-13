@@ -1,6 +1,7 @@
 import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { CircleAlert, ImagePlus, Store, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import type { PropsWithChildren } from 'react';
 import { EmailVerificationDialog } from '@/components/account/email-verification-dialog';
 import InputError from '@/components/input-error';
 import { CategoryCombobox } from '@/components/seller/category-combobox';
@@ -20,10 +21,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import { home, terms } from '@/routes';
 import { dashboard as sellerDashboard } from '@/routes/seller';
-import {
-    create as sellerApplication,
-    store as storeSellerApplication,
-} from '@/routes/seller-application';
+import { store as storeSellerApplication } from '@/routes/seller-application';
 
 type Category = {
     id: number;
@@ -168,6 +166,25 @@ function FileField({
     );
 }
 
+function SellerApplicationShell({ children }: PropsWithChildren) {
+    return (
+        <main className="min-h-svh bg-background px-4 py-8 md:py-12">
+            <div className="mx-auto w-full max-w-2xl">
+                <Link
+                    href={home()}
+                    className="inline-flex min-h-11 items-center font-display text-xl font-bold text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+                >
+                    Lapak Satoe
+                </Link>
+
+                <div className="mt-5 rounded-md border border-border bg-card p-5 md:p-6">
+                    {children}
+                </div>
+            </div>
+        </main>
+    );
+}
+
 export default function SellerApplication({
     application,
     is_seller,
@@ -176,7 +193,6 @@ export default function SellerApplication({
     const { auth } = usePage().props;
     const verified = auth.user.email_verified;
 
-    const [gateOpen, setGateOpen] = useState(!verified);
     const [otpOpen, setOtpOpen] = useState(false);
     const [continueOpen, setContinueOpen] = useState(false);
 
@@ -200,37 +216,38 @@ export default function SellerApplication({
     };
 
     const openOtp = () => {
-        setGateOpen(false);
         setOtpOpen(true);
     };
 
     if (is_seller) {
         return (
             <>
-                <Head title="Daftar penjual" />
+                <SellerApplicationShell>
+                    <Head title="Daftar penjual" />
 
-                <div className="flex flex-col gap-4 px-4 py-6 md:px-6">
-                    <div>
-                        <h1 className="font-display text-2xl font-bold">
-                            Kamu sudah jadi penjual
-                        </h1>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                            Lapakmu sudah dibuat dan masih tertutup. Buka lapak
-                            saat produkmu siap.
-                        </p>
-                    </div>
+                    <div className="flex flex-col gap-4">
+                        <div>
+                            <h1 className="font-display text-2xl font-bold">
+                                Kamu sudah jadi penjual
+                            </h1>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                                Lapakmu sudah dibuat dan masih tertutup. Buka
+                                lapak saat produkmu siap.
+                            </p>
+                        </div>
 
-                    <div className="flex flex-wrap gap-2">
-                        <Button asChild>
-                            <Link href={sellerDashboard()}>
-                                Buka dashboard seller
-                            </Link>
-                        </Button>
-                        <Button asChild variant="outline">
-                            <Link href={home()}>Kembali ke beranda</Link>
-                        </Button>
+                        <div className="flex flex-wrap gap-2">
+                            <Button asChild>
+                                <Link href={sellerDashboard()}>
+                                    Buka dashboard seller
+                                </Link>
+                            </Button>
+                            <Button asChild variant="outline">
+                                <Link href={home()}>Kembali ke beranda</Link>
+                            </Button>
+                        </div>
                     </div>
-                </div>
+                </SellerApplicationShell>
             </>
         );
     }
@@ -238,290 +255,287 @@ export default function SellerApplication({
     if (application?.status === 'pending') {
         return (
             <>
-                <Head title="Daftar penjual" />
+                <SellerApplicationShell>
+                    <Head title="Daftar penjual" />
 
-                <div className="flex flex-col gap-4 px-4 py-6 md:px-6">
-                    <div>
-                        <h1 className="font-display text-2xl font-bold">
-                            Pendaftaranmu sedang ditinjau
-                        </h1>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                            Admin akan memeriksa datamu. Hasilnya muncul di
-                            notifikasi dan halaman ini.
-                        </p>
+                    <div className="flex flex-col gap-4">
+                        <div>
+                            <h1 className="font-display text-2xl font-bold">
+                                Pendaftaranmu sedang ditinjau
+                            </h1>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                                Admin akan memeriksa datamu. Hasilnya muncul di
+                                notifikasi dan halaman ini.
+                            </p>
+                        </div>
+
+                        <Button
+                            asChild
+                            variant="outline"
+                            className="self-start"
+                        >
+                            <Link href={home()}>Kembali ke beranda</Link>
+                        </Button>
                     </div>
-
-                    <Button asChild variant="outline" className="self-start">
-                        <Link href={home()}>Kembali ke beranda</Link>
-                    </Button>
-                </div>
+                </SellerApplicationShell>
             </>
         );
     }
 
     return (
         <>
-            <Head title="Daftar penjual" />
+            <SellerApplicationShell>
+                <Head title="Daftar penjual" />
 
-            <div className="flex flex-col gap-6 px-4 py-6 md:px-6">
-                <div>
-                    <h1 className="font-display text-2xl font-bold">
-                        Daftar jadi penjual
-                    </h1>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                        Isi data diri dan lapakmu. Admin meninjau pendaftaran
-                        sebelum lapakmu aktif.
-                    </p>
-                </div>
-
-                {application?.status === 'rejected' && (
-                    <div className="flex items-start gap-3 rounded-md border border-border bg-highlight-soft px-4 py-3">
-                        <CircleAlert
-                            aria-hidden
-                            className="mt-0.5 size-5 shrink-0 text-price"
-                        />
-                        <div>
-                            <p className="font-medium text-price">
-                                Pendaftaran sebelumnya ditolak
-                            </p>
-                            <p className="mt-1 text-sm text-price">
-                                {application.reject_note ??
-                                    'Perbaiki datamu lalu kirim ulang.'}
-                            </p>
-                        </div>
-                    </div>
-                )}
-
-                {!verified ? (
-                    <section className="rounded-md border border-border bg-card px-4 py-6">
-                        <Store
-                            aria-hidden
-                            className="size-8 text-muted-foreground"
-                        />
-                        <h2 className="mt-3 font-display text-lg font-semibold">
-                            Verifikasi email dulu
-                        </h2>
-                        <p className="mt-1 max-w-prose text-sm text-muted-foreground">
-                            Pendaftaran penjual butuh email terverifikasi. Kami
-                            kirim kode 6 angka ke {auth.user.email_masked}.
+                <div className="flex flex-col gap-6">
+                    <div>
+                        <h1 className="font-display text-2xl font-bold">
+                            Daftar jadi penjual
+                        </h1>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                            Isi data diri dan lapakmu. Admin meninjau
+                            pendaftaran sebelum lapakmu aktif.
                         </p>
-                        <div className="mt-4 flex flex-wrap gap-2">
-                            <Button type="button" onClick={openOtp}>
-                                Verifikasi email
-                            </Button>
-                            <Button asChild variant="outline">
-                                <Link href={home()}>Nanti saja</Link>
-                            </Button>
-                        </div>
-                    </section>
-                ) : (
-                    <form
-                        className="grid max-w-2xl gap-5"
-                        onSubmit={(event) => {
-                            event.preventDefault();
-                            submit();
-                        }}
-                    >
-                        <div className="grid gap-2">
-                            <Label htmlFor="full_name">Nama lengkap</Label>
-                            <Input
-                                id="full_name"
-                                value={form.data.full_name}
-                                maxLength={100}
-                                autoComplete="name"
-                                onChange={(event) =>
-                                    form.setData(
-                                        'full_name',
-                                        event.target.value,
-                                    )
-                                }
-                            />
-                            <InputError message={form.errors.full_name} />
-                        </div>
+                    </div>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="nis">NIS</Label>
-                            <Input
-                                id="nis"
-                                value={form.data.nis}
-                                maxLength={30}
-                                inputMode="numeric"
-                                onChange={(event) =>
-                                    form.setData('nis', event.target.value)
-                                }
+                    {application?.status === 'rejected' && (
+                        <div className="flex items-start gap-3 rounded-md border border-border bg-highlight-soft px-4 py-3">
+                            <CircleAlert
+                                aria-hidden
+                                className="mt-0.5 size-5 shrink-0 text-price"
                             />
-                            <InputError message={form.errors.nis} />
-                        </div>
-
-                        <div className="grid gap-2">
-                            <Label htmlFor="whatsapp">Nomor WhatsApp</Label>
-                            <Input
-                                id="whatsapp"
-                                value={form.data.whatsapp}
-                                maxLength={20}
-                                inputMode="tel"
-                                placeholder="08xxxxxxxxxx"
-                                onChange={(event) =>
-                                    form.setData('whatsapp', event.target.value)
-                                }
-                            />
-                            <InputError message={form.errors.whatsapp} />
-                        </div>
-
-                        <div className="grid gap-2">
-                            <Label htmlFor="store_name">Nama lapak</Label>
-                            <Input
-                                id="store_name"
-                                value={form.data.store_name}
-                                maxLength={60}
-                                onChange={(event) =>
-                                    form.setData(
-                                        'store_name',
-                                        event.target.value,
-                                    )
-                                }
-                            />
-                            <InputError message={form.errors.store_name} />
-                        </div>
-
-                        <div className="grid gap-2">
-                            <Label htmlFor="description">Deskripsi lapak</Label>
-                            <Textarea
-                                id="description"
-                                value={form.data.description}
-                                maxLength={1000}
-                                onChange={(event) =>
-                                    form.setData(
-                                        'description',
-                                        event.target.value,
-                                    )
-                                }
-                            />
-                            <InputError message={form.errors.description} />
-                        </div>
-
-                        <div className="grid gap-2">
-                            <Label htmlFor="categories">Kategori produk</Label>
-                            <CategoryCombobox
-                                categories={categories}
-                                value={form.data.categories}
-                                invalid={form.errors.categories !== undefined}
-                                onChange={(ids) =>
-                                    form.setData('categories', ids)
-                                }
-                            />
-                            <InputError message={form.errors.categories} />
-                        </div>
-
-                        <div className="grid gap-2">
-                            <Label htmlFor="product_photos">Foto produk</Label>
-                            <FileField
-                                id="product_photos"
-                                files={form.data.product_photos}
-                                max={3}
-                                onChange={(files) =>
-                                    form.setData('product_photos', files)
-                                }
-                            />
-                            <InputError message={form.errors.product_photos} />
-                        </div>
-
-                        <div className="grid gap-2">
-                            <Label htmlFor="student_card">
-                                Kartu pelajar atau kartu perpustakaan
-                            </Label>
-                            <FileField
-                                id="student_card"
-                                files={
-                                    form.data.student_card === null
-                                        ? []
-                                        : [form.data.student_card]
-                                }
-                                max={1}
-                                onChange={(files) =>
-                                    form.setData(
-                                        'student_card',
-                                        files[0] ?? null,
-                                    )
-                                }
-                            />
-                            <p className="text-xs text-muted-foreground">
-                                Hanya admin yang bisa melihat berkas ini.
-                            </p>
-                            <InputError message={form.errors.student_card} />
-                        </div>
-
-                        <div className="flex items-start gap-3">
-                            <Checkbox
-                                id="agreed_terms"
-                                checked={form.data.agreed_terms}
-                                onCheckedChange={(checked) =>
-                                    form.setData(
-                                        'agreed_terms',
-                                        checked === true,
-                                    )
-                                }
-                            />
-                            <div className="grid gap-1">
-                                <Label
-                                    htmlFor="agreed_terms"
-                                    className="leading-snug font-normal"
-                                >
-                                    Saya sudah membaca dan setuju dengan{' '}
-                                    <a
-                                        href={terms.url()}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="font-medium text-primary underline underline-offset-4"
-                                    >
-                                        syarat dan ketentuan
-                                    </a>
-                                    .
-                                </Label>
-                                <InputError
-                                    message={form.errors.agreed_terms}
-                                />
+                            <div>
+                                <p className="font-medium text-price">
+                                    Pendaftaran sebelumnya ditolak
+                                </p>
+                                <p className="mt-1 text-sm text-price">
+                                    {application.reject_note ??
+                                        'Perbaiki datamu lalu kirim ulang.'}
+                                </p>
                             </div>
                         </div>
+                    )}
 
-                        <Button
-                            type="submit"
-                            disabled={form.processing}
-                            className="self-start"
+                    {!verified ? (
+                        <section className="rounded-md border border-border bg-background px-4 py-5">
+                            <Store
+                                aria-hidden
+                                className="size-8 text-muted-foreground"
+                            />
+                            <h2 className="mt-3 font-display text-lg font-semibold">
+                                Verifikasi email dulu
+                            </h2>
+                            <p className="mt-1 max-w-prose text-sm text-muted-foreground">
+                                Pendaftaran penjual butuh email terverifikasi.
+                                Kami kirim kode 6 angka ke{' '}
+                                {auth.user.email_masked}.
+                            </p>
+                            <div className="mt-4 flex flex-wrap gap-2">
+                                <Button type="button" onClick={openOtp}>
+                                    Verifikasi email
+                                </Button>
+                                <Button asChild variant="outline">
+                                    <Link href={home()}>Nanti saja</Link>
+                                </Button>
+                            </div>
+                        </section>
+                    ) : (
+                        <form
+                            className="grid max-w-2xl gap-5"
+                            onSubmit={(event) => {
+                                event.preventDefault();
+                                submit();
+                            }}
                         >
-                            {form.processing && <Spinner />}
-                            Kirim pendaftaran
-                        </Button>
-                    </form>
-                )}
-            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="full_name">Nama lengkap</Label>
+                                <Input
+                                    id="full_name"
+                                    value={form.data.full_name}
+                                    maxLength={100}
+                                    autoComplete="name"
+                                    onChange={(event) =>
+                                        form.setData(
+                                            'full_name',
+                                            event.target.value,
+                                        )
+                                    }
+                                />
+                                <InputError message={form.errors.full_name} />
+                            </div>
 
-            <Dialog open={gateOpen} onOpenChange={setGateOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle className="font-display text-xl">
-                            Verifikasi email untuk mendaftar
-                        </DialogTitle>
-                        <DialogDescription>
-                            Pendaftaran penjual butuh email terverifikasi. Kami
-                            kirim kode 6 angka ke {auth.user.email_masked}.
-                        </DialogDescription>
-                    </DialogHeader>
+                            <div className="grid gap-2">
+                                <Label htmlFor="nis">NIS</Label>
+                                <Input
+                                    id="nis"
+                                    value={form.data.nis}
+                                    maxLength={30}
+                                    inputMode="numeric"
+                                    onChange={(event) =>
+                                        form.setData('nis', event.target.value)
+                                    }
+                                />
+                                <InputError message={form.errors.nis} />
+                            </div>
 
-                    <DialogFooter>
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setGateOpen(false)}
-                        >
-                            Nanti saja
-                        </Button>
-                        <Button type="button" onClick={openOtp}>
-                            Verifikasi email
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+                            <div className="grid gap-2">
+                                <Label htmlFor="whatsapp">Nomor WhatsApp</Label>
+                                <Input
+                                    id="whatsapp"
+                                    value={form.data.whatsapp}
+                                    maxLength={20}
+                                    inputMode="tel"
+                                    placeholder="08xxxxxxxxxx"
+                                    onChange={(event) =>
+                                        form.setData(
+                                            'whatsapp',
+                                            event.target.value,
+                                        )
+                                    }
+                                />
+                                <InputError message={form.errors.whatsapp} />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="store_name">Nama lapak</Label>
+                                <Input
+                                    id="store_name"
+                                    value={form.data.store_name}
+                                    maxLength={60}
+                                    onChange={(event) =>
+                                        form.setData(
+                                            'store_name',
+                                            event.target.value,
+                                        )
+                                    }
+                                />
+                                <InputError message={form.errors.store_name} />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="description">
+                                    Deskripsi lapak
+                                </Label>
+                                <Textarea
+                                    id="description"
+                                    value={form.data.description}
+                                    maxLength={1000}
+                                    onChange={(event) =>
+                                        form.setData(
+                                            'description',
+                                            event.target.value,
+                                        )
+                                    }
+                                />
+                                <InputError message={form.errors.description} />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="categories">
+                                    Kategori produk
+                                </Label>
+                                <CategoryCombobox
+                                    categories={categories}
+                                    value={form.data.categories}
+                                    invalid={
+                                        form.errors.categories !== undefined
+                                    }
+                                    onChange={(ids) =>
+                                        form.setData('categories', ids)
+                                    }
+                                />
+                                <InputError message={form.errors.categories} />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="product_photos">
+                                    Foto produk
+                                </Label>
+                                <FileField
+                                    id="product_photos"
+                                    files={form.data.product_photos}
+                                    max={3}
+                                    onChange={(files) =>
+                                        form.setData('product_photos', files)
+                                    }
+                                />
+                                <InputError
+                                    message={form.errors.product_photos}
+                                />
+                            </div>
+
+                            <div className="grid gap-2">
+                                <Label htmlFor="student_card">
+                                    Kartu pelajar atau kartu perpustakaan
+                                </Label>
+                                <FileField
+                                    id="student_card"
+                                    files={
+                                        form.data.student_card === null
+                                            ? []
+                                            : [form.data.student_card]
+                                    }
+                                    max={1}
+                                    onChange={(files) =>
+                                        form.setData(
+                                            'student_card',
+                                            files[0] ?? null,
+                                        )
+                                    }
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                    Hanya admin yang bisa melihat berkas ini.
+                                </p>
+                                <InputError
+                                    message={form.errors.student_card}
+                                />
+                            </div>
+
+                            <div className="flex items-start gap-3">
+                                <Checkbox
+                                    id="agreed_terms"
+                                    checked={form.data.agreed_terms}
+                                    onCheckedChange={(checked) =>
+                                        form.setData(
+                                            'agreed_terms',
+                                            checked === true,
+                                        )
+                                    }
+                                />
+                                <div className="grid gap-1">
+                                    <Label
+                                        htmlFor="agreed_terms"
+                                        className="leading-snug font-normal"
+                                    >
+                                        Saya sudah membaca dan setuju dengan{' '}
+                                        <a
+                                            href={terms.url()}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="font-medium text-primary underline underline-offset-4"
+                                        >
+                                            syarat dan ketentuan
+                                        </a>
+                                        .
+                                    </Label>
+                                    <InputError
+                                        message={form.errors.agreed_terms}
+                                    />
+                                </div>
+                            </div>
+
+                            <Button
+                                type="submit"
+                                disabled={form.processing}
+                                className="self-start"
+                            >
+                                {form.processing && <Spinner />}
+                                Kirim pendaftaran
+                            </Button>
+                        </form>
+                    )}
+                </div>
+            </SellerApplicationShell>
 
             <EmailVerificationDialog
                 open={otpOpen}
@@ -561,12 +575,3 @@ export default function SellerApplication({
         </>
     );
 }
-
-SellerApplication.layout = {
-    breadcrumbs: [
-        {
-            title: 'Daftar penjual',
-            href: sellerApplication(),
-        },
-    ],
-};

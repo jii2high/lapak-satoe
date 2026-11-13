@@ -19,6 +19,8 @@ void createInertiaApp({
                 return PublicLayout;
             case name.startsWith('auth/'):
                 return AuthLayout;
+            case name === 'seller/application':
+                return null;
             case name.startsWith('settings/'): {
                 const auth = page.props.auth as Auth | undefined;
 

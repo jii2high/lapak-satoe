@@ -60,6 +60,19 @@ class SellerApplicationTest extends TestCase
                 ->where('categories.0.name', 'Minuman'));
     }
 
+    public function test_an_unverified_user_can_open_the_application_page()
+    {
+        $user = User::factory()->unverified()->create();
+
+        $this->actingAs($user)
+            ->get(route('seller-application.create'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('seller/application')
+                ->where('application', null),
+            );
+    }
+
     public function test_an_unverified_user_can_not_submit_an_application()
     {
         Storage::fake('public');
