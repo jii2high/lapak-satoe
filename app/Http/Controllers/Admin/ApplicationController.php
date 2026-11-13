@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\ApplicationStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\RejectApplicationRequest;
 use App\Models\SellerApplication;
 use App\Services\ApplicationService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -17,13 +19,29 @@ class ApplicationController extends Controller
 {
     public function __construct(private readonly ApplicationService $applications) {}
 
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        $query = trim((string) $request->query('q', ''));
+        $status = $request->query('status');
+        $status = is_string($status) && in_array($status, ApplicationStatus::values(), true)
+            ? $status
+            : 'all';
+        $pattern = '%'.addcslashes($query, '%_\\').'%';
+
         $applications = SellerApplication::query()
             ->with(['user:id,display_name,username', 'categories:id,name', 'files'])
+            ->when($query !== '', fn (Builder $sub) => $sub->where(fn (Builder $words) => $words
+                ->where('full_name', 'like', $pattern)
+                ->orWhere('store_name', 'like', $pattern)
+                ->orWhere('nis', 'like', $pattern)
+                ->orWhereHas('user', fn (Builder $user) => $user
+                    ->where('username', 'like', $pattern)
+                    ->orWhere('display_name', 'like', $pattern))))
+            ->when($status !== 'all', fn (Builder $sub) => $sub->where('status', $status))
             ->latest('id')
-            ->get()
-            ->map(fn (SellerApplication $application): array => [
+            ->paginate(20)
+            ->withQueryString()
+            ->through(fn (SellerApplication $application): array => [
                 'id' => $application->id,
                 'full_name' => $application->full_name,
                 'nis' => $application->nis,
@@ -48,6 +66,10 @@ class ApplicationController extends Controller
 
         return Inertia::render('admin/applications', [
             'applications' => $applications,
+            'filters' => [
+                'q' => $query,
+                'status' => $status,
+            ],
         ]);
     }
 

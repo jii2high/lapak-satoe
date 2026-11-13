@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\ApplicationController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Marketplace\CartController;
 use App\Http\Controllers\Marketplace\CheckoutController;
 use App\Http\Controllers\Marketplace\ExploreController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\Marketplace\SearchController;
 use App\Http\Controllers\Marketplace\StoreController;
 use App\Http\Controllers\Marketplace\WishlistController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\Seller\OrderController as SellerOrderController;
 use App\Http\Controllers\Seller\ProductController as SellerProductController;
 use App\Http\Controllers\Seller\StoreController as SellerStoreController;
@@ -47,6 +49,10 @@ Route::middleware('auth')->group(function () {
     Route::get('pesanan-saya', [BuyerOrderController::class, 'index'])->name('orders.index');
     Route::post('orders/{order}/cancel', [BuyerOrderController::class, 'cancel'])->name('orders.cancel');
     Route::post('orders/{order}/confirm', [BuyerOrderController::class, 'confirm'])->name('orders.confirm');
+
+    Route::post('report', [ReportController::class, 'store'])
+        ->middleware('throttle:reports')
+        ->name('reports.store');
 
     Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('notifications/read', [NotificationController::class, 'read'])->name('notifications.read');
@@ -87,6 +93,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('applications/{application}/card', [ApplicationController::class, 'card'])->name('applications.card');
     Route::post('applications/{application}/approve', [ApplicationController::class, 'approve'])->name('applications.approve');
     Route::post('applications/{application}/reject', [ApplicationController::class, 'reject'])->name('applications.reject');
+
+    Route::get('reports', [AdminReportController::class, 'index'])->name('reports.index');
+    Route::get('reports/{report}/pdf', [AdminReportController::class, 'pdf'])->name('reports.pdf');
+    Route::post('reports/{report}/process', [AdminReportController::class, 'process'])->name('reports.process');
+    Route::post('reports/{report}/reject', [AdminReportController::class, 'reject'])->name('reports.reject');
+    Route::post('reports/{report}/restore', [AdminReportController::class, 'restore'])->name('reports.restore');
 });
 
 require __DIR__.'/settings.php';

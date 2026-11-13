@@ -54,6 +54,19 @@ class Report extends Model
     }
 
     /**
+     * Nama objek terlapor untuk daftar admin dan notifikasi.
+     */
+    public function targetLabel(): string
+    {
+        if ($this->product_id === null) {
+            return 'Lapak '.($this->store->name ?? 'yang dihapus');
+        }
+
+        // Produk pakai soft delete, jadi relasinya bisa kosong walau product_id terisi.
+        return 'Produk '.(Product::withTrashed()->whereKey($this->product_id)->value('name') ?? 'yang dihapus');
+    }
+
+    /**
      * @return BelongsTo<User, $this>
      */
     public function reporter(): BelongsTo

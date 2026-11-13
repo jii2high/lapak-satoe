@@ -64,6 +64,7 @@ class HandleInertiaRequests extends Middleware
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'cart_count' => $user === null ? 0 : $this->carts->count($user),
+            'violation_types' => config('lapak.violation_types'),
         ];
     }
 }

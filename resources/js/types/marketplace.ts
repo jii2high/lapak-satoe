@@ -79,6 +79,7 @@ export type OrderStatus =
     | 'disputed';
 
 export type OrderItemData = {
+    product_id: number;
     name: string;
     price: number;
     qty: number;

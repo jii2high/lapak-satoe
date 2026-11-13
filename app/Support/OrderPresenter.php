@@ -30,6 +30,7 @@ class OrderPresenter
             ],
             'items' => $order->items
                 ->map(fn ($item) => [
+                    'product_id' => $item->product_id,
                     'name' => $item->product_name,
                     'price' => $item->price,
                     'qty' => $item->qty,

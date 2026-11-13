@@ -156,6 +156,39 @@ class OrderService
     }
 
     /**
+     * BR-23, dari form "Ada masalah" pembeli. Auto-confirm berhenti.
+     *
+     * @throws ValidationException
+     */
+    public function dispute(Order $order): void
+    {
+        $this->transition($order, [OrderStatus::AwaitingBuyer], function (Order $locked): void {
+            $locked->update([
+                'status' => OrderStatus::Disputed,
+                'auto_confirm_at' => null,
+            ]);
+        });
+    }
+
+    /**
+     * BR-23, dipakai ReportService saat laporan ditangani admin.
+     *
+     * @throws ValidationException
+     */
+    public function resolveDispute(Order $order): void
+    {
+        $this->transition($order, [OrderStatus::Disputed], function (Order $locked): void {
+            $this->applyStock($locked, sold: 1);
+
+            $locked->update([
+                'status' => OrderStatus::Completed,
+                'completed_at' => now(),
+                'auto_confirm_at' => null,
+            ]);
+        });
+    }
+
+    /**
      * @param  array<int, OrderStatus>  $allowed
      */
     private function transition(Order $order, array $allowed, Closure $mutate): void

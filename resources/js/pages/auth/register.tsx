@@ -18,7 +18,8 @@ export default function Register({ passwordRules }: Props) {
         <>
             <Head title="Daftar" />
             <Form
-                {...store.form()}
+                action={store.url()}
+                method="post"
                 resetOnSuccess={['password', 'password_confirmation']}
                 disableWhileProcessing
                 className="flex flex-col gap-6"

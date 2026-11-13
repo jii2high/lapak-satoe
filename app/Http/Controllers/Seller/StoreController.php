@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Seller;
 use App\Enums\StoreStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Seller\UpdateStoreRequest;
+use App\Models\Report;
 use App\Models\Store;
 use App\Services\StoreService;
 use Illuminate\Http\RedirectResponse;
@@ -38,6 +39,13 @@ class StoreController extends Controller
                     : Storage::disk('public')->url($store->banner_path),
                 'status' => $store->status->value,
                 'is_suspended' => $store->is_suspended,
+                'suspension_note' => $store->is_suspended
+                    ? Report::query()
+                        ->where('store_id', $store->id)
+                        ->whereNotNull('reported_note')
+                        ->latest('handled_at')
+                        ->value('reported_note')
+                    : null,
             ],
             'previous_name' => $store->nameHistories()
                 ->where('changed_at', '>=', now()->subDays(7))

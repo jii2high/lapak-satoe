@@ -114,7 +114,7 @@ export function NotificationBell({
                                 <button
                                     type="button"
                                     onClick={() => void openItem(item)}
-                                    className="flex w-full min-h-11 flex-col items-start gap-1 p-3 text-left text-sm hover:bg-secondary"
+                                    className="flex min-h-11 w-full flex-col items-start gap-1 p-3 text-left text-sm hover:bg-secondary"
                                 >
                                     <span className="flex items-center gap-2 font-medium">
                                         {item.read_at === null && (
@@ -140,7 +140,9 @@ export function NotificationBell({
                                             <Button
                                                 type="button"
                                                 size="sm"
-                                                onClick={() => confirmOrder(item)}
+                                                onClick={() =>
+                                                    confirmOrder(item)
+                                                }
                                             >
                                                 Konfirmasi selesai
                                             </Button>

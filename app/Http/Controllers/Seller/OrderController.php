@@ -9,6 +9,7 @@ use App\Http\Requests\Seller\CancelOrderRequest;
 use App\Models\Order;
 use App\Services\OrderService;
 use App\Support\OrderPresenter;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -41,11 +42,24 @@ class OrderController extends Controller
     public function index(Request $request): Response
     {
         $tab = $request->query('tab') === 'riwayat' ? 'riwayat' : 'aktif';
+        $statuses = $tab === 'riwayat' ? self::HISTORY : self::ACTIVE;
+        $submitted = $request->query('status');
+        $status = is_string($submitted) && in_array($submitted, array_map(
+            fn (OrderStatus $value) => $value->value,
+            $statuses,
+        ), true) ? $submitted : 'all';
+        $query = trim((string) $request->query('q', ''));
+        $pattern = '%'.addcslashes($query, '%_\\').'%';
         $store = $request->user()->store()->firstOrFail();
 
         $orders = $store->orders()
             ->with(['store', 'buyer', 'items'])
-            ->whereIn('status', $tab === 'riwayat' ? self::HISTORY : self::ACTIVE)
+            ->whereIn('status', $status === 'all' ? $statuses : [OrderStatus::from($status)])
+            ->when($query !== '', fn (Builder $sub) => $sub->where(fn (Builder $words) => $words
+                ->where('code', 'like', $pattern)
+                ->orWhereHas('buyer', fn (Builder $buyer) => $buyer
+                    ->where('username', 'like', $pattern)
+                    ->orWhere('display_name', 'like', $pattern))))
             ->latest('id')
             ->paginate(20)
             ->withQueryString()
@@ -54,6 +68,10 @@ class OrderController extends Controller
         return Inertia::render('seller/orders', [
             'orders' => $orders,
             'tab' => $tab,
+            'filters' => [
+                'q' => $query,
+                'status' => $status,
+            ],
         ]);
     }
 

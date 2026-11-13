@@ -19,7 +19,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
                 </div>
             )}
 
-            <Form {...email.form()} className="grid gap-6">
+            <Form action={email.url()} method="post" className="grid gap-6">
                 {({ processing, errors }) => (
                     <>
                         <div className="grid gap-2">

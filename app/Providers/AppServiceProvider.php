@@ -35,6 +35,10 @@ class AppServiceProvider extends ServiceProvider
         // Route checkout ada di grup auth, jadi user selalu ada.
         RateLimiter::for('checkout', fn (Request $request) => Limit::perMinute(10)
             ->by($request->user()->id));
+
+        // BR-18: laporan dibatasi supaya antrean admin tidak dibanjiri.
+        RateLimiter::for('reports', fn (Request $request) => Limit::perHour(5)
+            ->by($request->user()->id));
     }
 
     /**

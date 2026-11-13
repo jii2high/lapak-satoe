@@ -3,6 +3,7 @@ import { Minus, Package, Plus, ShoppingCart } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { ProductCard } from '@/components/marketplace/product-card';
+import { ReportDialog } from '@/components/marketplace/report-dialog';
 import { WishlistButton } from '@/components/marketplace/wishlist-button';
 import { Button } from '@/components/ui/button';
 import { addToCart } from '@/lib/cart-storage';
@@ -150,10 +151,17 @@ export default function ProductShow({ product, related }: Props) {
                         </Link>
                     </div>
 
-                    <div className="mt-4">
+                    <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                         <WishlistButton
                             productId={product.id}
                             withLabel
+                            className="w-full sm:w-auto"
+                        />
+                        <ReportDialog
+                            target={{
+                                label: product.name,
+                                productId: product.id,
+                            }}
                             className="w-full sm:w-auto"
                         />
                     </div>

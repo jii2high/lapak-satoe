@@ -3,6 +3,7 @@ import { useState } from 'react';
 import InputError from '@/components/input-error';
 import { OrderDetailDialog } from '@/components/marketplace/order-detail-dialog';
 import { OrderStatusBadge } from '@/components/marketplace/order-status-badge';
+import { ReportDialog } from '@/components/marketplace/report-dialog';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -234,13 +235,26 @@ export function OrderCard({
                 )}
 
                 {viewer === 'buyer' && order.status === 'awaiting_buyer' && (
-                    <Button
-                        type="button"
-                        size="sm"
-                        onClick={() => setDialog('buyer-confirm')}
-                    >
-                        Konfirmasi selesai
-                    </Button>
+                    <>
+                        <Button
+                            type="button"
+                            size="sm"
+                            onClick={() => setDialog('buyer-confirm')}
+                        >
+                            Konfirmasi selesai
+                        </Button>
+                        <ReportDialog
+                            triggerLabel="Ada masalah"
+                            target={{
+                                label: order.store.name,
+                                orderId: order.id,
+                                items: order.items.map((item) => ({
+                                    id: item.product_id,
+                                    name: item.name,
+                                })),
+                            }}
+                        />
+                    </>
                 )}
             </div>
 

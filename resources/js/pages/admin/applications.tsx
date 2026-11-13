@@ -1,7 +1,8 @@
 import { Head, router, useForm } from '@inertiajs/react';
-import { Check, ClipboardList, Eye, FileText, X } from 'lucide-react';
-import { useState } from 'react';
+import { Check, ClipboardList, Eye, FileText, Search, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import InputError from '@/components/input-error';
+import { Pagination } from '@/components/pagination';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,7 +13,15 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
 import {
     Table,
@@ -23,11 +32,13 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
+import { useDebounce } from '@/hooks/use-debounce';
 import {
     approve as approveApplication,
-    index as applications,
+    index as applicationsIndex,
     reject as rejectApplication,
 } from '@/routes/admin/applications';
+import type { Paginator } from '@/types';
 
 type Application = {
     id: number;
@@ -48,9 +59,22 @@ type Application = {
     student_card_url: string;
 };
 
-type Props = {
-    applications: Application[];
+type Filters = {
+    q: string;
+    status: string;
 };
+
+type Props = {
+    applications: Paginator<Application>;
+    filters: Filters;
+};
+
+const statusFilters = [
+    { value: 'all', label: 'Semua status' },
+    { value: 'pending', label: 'Menunggu tinjauan' },
+    { value: 'approved', label: 'Diterima' },
+    { value: 'rejected', label: 'Ditolak' },
+];
 
 const statusStyles: Record<
     string,
@@ -100,14 +124,47 @@ function formatDate(value: string | null): string {
     });
 }
 
-export default function AdminApplications({ applications }: Props) {
+export default function AdminApplications({ applications, filters }: Props) {
     const [detail, setDetail] = useState<Application | null>(null);
     const [approving, setApproving] = useState<Application | null>(null);
     const [approveError, setApproveError] = useState<string | null>(null);
     const [processing, setProcessing] = useState(false);
     const [rejecting, setRejecting] = useState<Application | null>(null);
+    const [search, setSearch] = useState(filters.q);
+    const debounced = useDebounce(search);
 
     const rejectForm = useForm({ reject_note: '' });
+    const filtered = filters.q !== '' || filters.status !== 'all';
+
+    useEffect(() => {
+        if (debounced === filters.q) {
+            return;
+        }
+
+        router.get(
+            applicationsIndex.url({
+                query: {
+                    ...(debounced === '' ? {} : { q: debounced }),
+                    ...(filters.status === 'all'
+                        ? {}
+                        : { status: filters.status }),
+                },
+            }),
+            { preserveState: true, preserveScroll: true, replace: true },
+        );
+    }, [debounced, filters.q, filters.status]);
+
+    const changeStatus = (status: string) => {
+        router.get(
+            applicationsIndex.url({
+                query: {
+                    ...(filters.q === '' ? {} : { q: filters.q }),
+                    ...(status === 'all' ? {} : { status }),
+                },
+            }),
+            { preserveState: true, preserveScroll: true },
+        );
+    };
 
     const openDetail = (application: Application) => {
         setDetail(application);
@@ -174,17 +231,56 @@ export default function AdminApplications({ applications }: Props) {
                     </p>
                 </div>
 
-                {applications.length === 0 ? (
+                <div className="flex flex-col gap-2 sm:flex-row">
+                    <div className="relative flex-1">
+                        <Search
+                            aria-hidden
+                            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+                        />
+                        <Input
+                            value={search}
+                            onChange={(event) => setSearch(event.target.value)}
+                            aria-label="Cari pendaftaran"
+                            placeholder="Cari nama, lapak, atau NIS"
+                            className="pl-9"
+                        />
+                    </div>
+
+                    <Select value={filters.status} onValueChange={changeStatus}>
+                        <SelectTrigger
+                            aria-label="Filter status pendaftaran"
+                            className="w-full sm:w-56"
+                        >
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {statusFilters.map((filter) => (
+                                <SelectItem
+                                    key={filter.value}
+                                    value={filter.value}
+                                >
+                                    {filter.label}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                {applications.data.length === 0 ? (
                     <div className="border border-border bg-card px-4 py-10 text-center">
                         <ClipboardList
                             aria-hidden
                             className="mx-auto size-8 text-muted-foreground"
                         />
                         <h2 className="mt-3 font-display text-lg font-semibold">
-                            Belum ada pendaftaran
+                            {filtered
+                                ? 'Tidak ada pendaftaran cocok'
+                                : 'Belum ada pendaftaran'}
                         </h2>
                         <p className="mx-auto mt-2 max-w-prose text-sm text-muted-foreground">
-                            Pendaftaran penjual baru muncul di halaman ini.
+                            {filtered
+                                ? 'Ubah kata kunci atau filter status.'
+                                : 'Pendaftaran penjual baru muncul di halaman ini.'}
                         </p>
                     </div>
                 ) : (
@@ -203,7 +299,7 @@ export default function AdminApplications({ applications }: Props) {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {applications.map((application) => (
+                                    {applications.data.map((application) => (
                                         <TableRow key={application.id}>
                                             <TableCell className="font-medium">
                                                 {application.full_name}
@@ -238,7 +334,7 @@ export default function AdminApplications({ applications }: Props) {
                         </div>
 
                         <ul className="grid gap-3 md:hidden">
-                            {applications.map((application) => (
+                            {applications.data.map((application) => (
                                 <li
                                     key={application.id}
                                     className="border border-border bg-card p-4"
@@ -273,6 +369,11 @@ export default function AdminApplications({ applications }: Props) {
                                 </li>
                             ))}
                         </ul>
+
+                        <Pagination
+                            links={applications.links}
+                            lastPage={applications.last_page}
+                        />
                     </>
                 )}
             </div>
@@ -542,7 +643,7 @@ AdminApplications.layout = {
     breadcrumbs: [
         {
             title: 'Antrean pendaftaran',
-            href: applications(),
+            href: applicationsIndex(),
         },
     ],
 };

@@ -8,6 +8,7 @@ use App\Http\Requests\Seller\StoreProductRequest;
 use App\Http\Requests\Seller\UpdateProductRequest;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Report;
 use App\Models\Store;
 use App\Support\ImageStorage;
 use Illuminate\Database\Eloquent\Builder;
@@ -315,6 +316,13 @@ class ProductController extends Controller
             'reserved' => $product->reserved,
             'is_active' => $product->is_active,
             'is_suspended' => $product->is_suspended,
+            'suspension_note' => $product->is_suspended
+                ? Report::query()
+                    ->where('product_id', $product->id)
+                    ->whereNotNull('reported_note')
+                    ->latest('handled_at')
+                    ->value('reported_note')
+                : null,
             'images' => $product->images
                 ->map(fn ($image) => [
                     'id' => $image->id,

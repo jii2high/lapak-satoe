@@ -2,6 +2,7 @@ import { Link, router, usePage } from '@inertiajs/react';
 import {
     ArrowLeftRight,
     ClipboardList,
+    Flag,
     Home,
     LayoutGrid,
     Package,
@@ -27,6 +28,7 @@ import { switchRole } from '@/routes/account';
 import { dashboard as adminDashboard } from '@/routes/admin';
 import { index as adminApplications } from '@/routes/admin/applications';
 import { index as adminCategories } from '@/routes/admin/categories';
+import { index as adminReports } from '@/routes/admin/reports';
 import { dashboard as sellerDashboard } from '@/routes/seller';
 import { index as sellerOrders } from '@/routes/seller/orders';
 import { index as sellerProducts } from '@/routes/seller/products';
@@ -73,6 +75,11 @@ export function AppSidebar() {
                       title: 'Antrean pendaftaran',
                       href: adminApplications(),
                       icon: ClipboardList,
+                  },
+                  {
+                      title: 'Pelaporan',
+                      href: adminReports(),
+                      icon: Flag,
                   },
                   {
                       title: 'Kategori',

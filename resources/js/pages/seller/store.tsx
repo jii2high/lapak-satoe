@@ -34,6 +34,7 @@ type StoreData = {
     banner_url: string | null;
     status: StoreStatus;
     is_suspended: boolean;
+    suspension_note: string | null;
 };
 
 type Props = {
@@ -272,6 +273,11 @@ export default function SellerStore({
                                 tampil di katalog. Hubungi admin untuk
                                 memulihkan.
                             </p>
+                            {store.suspension_note !== null && (
+                                <p className="mt-2 text-sm text-foreground">
+                                    Catatan admin: {store.suspension_note}
+                                </p>
+                            )}
                         </div>
                     </div>
                 )}

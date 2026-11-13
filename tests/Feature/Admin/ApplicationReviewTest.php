@@ -72,13 +72,46 @@ class ApplicationReviewTest extends TestCase
             ->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->component('admin/applications')
-                ->has('applications', 1)
-                ->where('applications.0.full_name', 'Budi Santoso')
-                ->where('applications.0.nis', '12345')
-                ->where('applications.0.store_name', 'Kopi Budi')
-                ->where('applications.0.status', 'pending')
-                ->where('applications.0.categories', ['Minuman'])
-                ->where('applications.0.student_card_url', route('admin.applications.card', $application)));
+                ->has('applications.data', 1)
+                ->where('applications.data.0.full_name', 'Budi Santoso')
+                ->where('applications.data.0.nis', '12345')
+                ->where('applications.data.0.store_name', 'Kopi Budi')
+                ->where('applications.data.0.status', 'pending')
+                ->where('applications.data.0.categories', ['Minuman'])
+                ->where('applications.data.0.student_card_url', route('admin.applications.card', $application)));
+    }
+
+    public function test_the_queue_can_be_searched_and_filtered()
+    {
+        $kopi = $this->application(['store_name' => 'Kopi Budi']);
+        $approved = User::factory()->create()->applications()->create([
+            'full_name' => 'Siti Aminah',
+            'nis' => '67890',
+            'whatsapp' => '081298765432',
+            'store_name' => 'Teh Manis',
+            'description' => 'Aneka teh.',
+            'status' => ApplicationStatus::Approved,
+            'agreed_terms_at' => now(),
+        ]);
+
+        $this->actingAs($this->admin())
+            ->get(route('admin.applications.index', ['q' => 'Kopi']))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->has('applications.data', 1)
+                ->where('applications.data.0.id', $kopi->id)
+                ->where('filters.q', 'Kopi'));
+
+        $this->actingAs($this->admin())
+            ->get(route('admin.applications.index', ['status' => 'approved']))
+            ->assertInertia(fn ($page) => $page
+                ->has('applications.data', 1)
+                ->where('applications.data.0.id', $approved->id)
+                ->where('filters.status', 'approved'));
+
+        $this->actingAs($this->admin())
+            ->get(route('admin.applications.index', ['status' => 'bogus']))
+            ->assertInertia(fn ($page) => $page->has('applications.data', 2));
     }
 
     public function test_approving_grants_the_seller_role_and_creates_a_closed_store()

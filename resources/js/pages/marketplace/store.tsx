@@ -1,6 +1,7 @@
 import { Head } from '@inertiajs/react';
 import { Store as StoreIcon } from 'lucide-react';
 import { ProductCard } from '@/components/marketplace/product-card';
+import { ReportDialog } from '@/components/marketplace/report-dialog';
 import { WishlistButton } from '@/components/marketplace/wishlist-button';
 import { Pagination } from '@/components/pagination';
 import type { Paginator, ProductCardData, StoreCardData } from '@/types';
@@ -73,7 +74,12 @@ export default function StoreShow({ store, products }: Props) {
                         </div>
                     </div>
 
-                    <WishlistButton storeId={store.id} withLabel />
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                        <WishlistButton storeId={store.id} withLabel />
+                        <ReportDialog
+                            target={{ label: store.name, storeId: store.id }}
+                        />
+                    </div>
                 </div>
             </section>
 

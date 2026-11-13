@@ -22,7 +22,8 @@ export default function Login({ status, canResetPassword }: Props) {
             <Head title="Masuk" />
 
             <Form
-                {...store.form()}
+                action={store.url()}
+                method="post"
                 resetOnSuccess={['password']}
                 className="flex flex-col gap-6"
             >

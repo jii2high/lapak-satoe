@@ -13,6 +13,7 @@ declare module '@inertiajs/core' {
             auth: Auth;
             sidebarOpen: boolean;
             cart_count: number;
+            violation_types: Record<string, string>;
             [key: string]: unknown;
         };
     }

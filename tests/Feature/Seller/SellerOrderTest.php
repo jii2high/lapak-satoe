@@ -79,6 +79,33 @@ class SellerOrderTest extends TestCase
                 ->where('orders.data.0.status', OrderStatus::Cancelled->value));
     }
 
+    public function test_the_order_list_can_be_searched_and_filtered()
+    {
+        [$seller, $store] = $this->storeForSeller();
+        $product = Product::factory()->for($store)->create();
+        $pending = $this->orderFor($store, $product, 1, OrderStatus::Pending);
+        $unconfirmed = $this->orderFor($store, $product, 1, OrderStatus::Unconfirmed);
+
+        $this->actingAs($seller)
+            ->get(route('seller.orders.index', ['status' => 'pending']))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('orders.data', 1)
+                ->where('orders.data.0.id', $pending->id)
+                ->where('filters.status', 'pending'));
+
+        $this->actingAs($seller)
+            ->get(route('seller.orders.index', ['q' => $unconfirmed->buyer->username]))
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('orders.data', 1)
+                ->where('orders.data.0.id', $unconfirmed->id)
+                ->where('filters.q', $unconfirmed->buyer->username));
+
+        $this->actingAs($seller)
+            ->get(route('seller.orders.index', ['status' => 'bogus']))
+            ->assertInertia(fn (Assert $page) => $page->has('orders.data', 2));
+    }
+
     public function test_an_order_can_be_accepted()
     {
         [$seller, $store] = $this->storeForSeller();

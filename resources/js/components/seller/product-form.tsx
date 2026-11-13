@@ -40,6 +40,7 @@ export type ProductDetail = {
     reserved: number;
     is_active: boolean;
     is_suspended: boolean;
+    suspension_note?: string | null;
     images: ProductImage[];
 };
 
@@ -155,6 +156,8 @@ export function ProductForm({
                     <p className="text-sm text-foreground">
                         Produk ini dinonaktifkan admin. Produk tidak tampil di
                         katalog dan tidak bisa diaktifkan sendiri.
+                        {product?.suspension_note != null &&
+                            ` Catatan admin: ${product.suspension_note}`}
                     </p>
                 </div>
             )}
