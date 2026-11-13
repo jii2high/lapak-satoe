@@ -1,4 +1,5 @@
 import { Link } from '@inertiajs/react';
+import AppLogoIcon from '@/components/app-logo-icon';
 import { home } from '@/routes';
 import type { AuthLayoutProps } from '@/types';
 
@@ -12,8 +13,9 @@ export default function AuthSimpleLayout({
             <div className="w-full max-w-[400px]">
                 <Link
                     href={home()}
-                    className="mb-6 inline-flex min-h-11 items-center font-display text-xl font-bold text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+                    className="mb-6 inline-flex min-h-11 items-center gap-2 font-display text-xl font-bold text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
                 >
+                    <AppLogoIcon aria-hidden className="size-8 shrink-0" />
                     Lapak Satoe
                 </Link>
 

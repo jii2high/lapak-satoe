@@ -8,6 +8,7 @@ import {
     UserRound,
 } from 'lucide-react';
 import { type PropsWithChildren, useEffect, useState } from 'react';
+import AppLogoIcon from '@/components/app-logo-icon';
 import { CartSheet } from '@/components/marketplace/cart-sheet';
 import { SearchInput } from '@/components/marketplace/search-input';
 import { NotificationBell } from '@/components/notification-bell';
@@ -110,8 +111,9 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                 <div className="mx-auto flex h-14 w-full max-w-[1280px] items-center gap-2 px-4 md:h-16 md:gap-6 md:px-6 lg:px-8">
                     <Link
                         href={home()}
-                        className="flex min-h-11 shrink-0 items-center font-display text-xl font-bold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+                        className="flex min-h-11 shrink-0 items-center gap-2 font-display text-xl font-bold focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
                     >
+                        <AppLogoIcon aria-hidden className="size-8 shrink-0" />
                         Lapak Satoe
                     </Link>
 
