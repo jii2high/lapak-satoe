@@ -8,6 +8,7 @@ use App\Http\Controllers\Marketplace\ProductController;
 use App\Http\Controllers\Marketplace\SearchController;
 use App\Http\Controllers\Marketplace\StoreController;
 use App\Http\Controllers\Marketplace\WishlistController;
+use App\Http\Controllers\Seller\ProductController as SellerProductController;
 use App\Http\Controllers\Seller\StoreController as SellerStoreController;
 use App\Http\Controllers\SellerApplicationController;
 use App\Http\Controllers\TermsController;
@@ -34,6 +35,12 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'role:seller'])->prefix('seller')->name('seller.')->group(function () {
     Route::redirect('/', '/seller/dashboard')->name('root');
     Route::inertia('dashboard', 'seller/dashboard')->name('dashboard');
+
+    Route::get('products/create', [SellerProductController::class, 'create'])->name('products.create');
+    Route::post('products', [SellerProductController::class, 'store'])->name('products.store');
+    Route::get('products/{product}/edit', [SellerProductController::class, 'edit'])->name('products.edit');
+    Route::patch('products/{product}', [SellerProductController::class, 'update'])->name('products.update');
+    Route::delete('products/{product}', [SellerProductController::class, 'destroy'])->name('products.destroy');
 
     Route::get('store', [SellerStoreController::class, 'edit'])->name('store.edit');
     Route::patch('store', [SellerStoreController::class, 'update'])->name('store.update');
